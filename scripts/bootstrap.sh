@@ -123,8 +123,13 @@ apkbuildname() {
 }
 
 build_pkg() {
-	local pkgbuild="$1"
-	shift
+	local pkgbuild
+	if [ -n "$PKGBUILD" ]; then
+		pkgbuild="$PKGBUILD"
+	else
+		pkgbuild="$1"
+		shift
+	fi
 	local pkgdir="$(dirname "$pkgbuild")"
 	if [ ! -f "$pkgbuild" ]; then
 		die "PKGBUILD not found: $pkgbuild"
