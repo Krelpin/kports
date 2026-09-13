@@ -6,7 +6,7 @@
 
 set -e
 
-scriptdir="$(dirname "$0")"
+scriptdir="$(cd "$(dirname "$0")" && pwd -P)"
 
 # Source helper functions
 if [ -e "$scriptdir/functions.sh" ]; then
@@ -266,10 +266,8 @@ if [ -z "$RELEASE" ]; then
 fi
 
 if [ -z "$REPOS" ] && [ -z "$REPOS_FILE" ]; then
-	# Default local/workspace fallback if no remote repo given
-	REPOS_FILE="$scriptdir/../pacman.conf"
-	if [ ! -f "$REPOS_FILE" ]; then
-		REPOS="file:///var/cache/pacman/pkg"
+	if [ -f "$scriptdir/../pacman.conf" ]; then
+		REPOS_FILE="$scriptdir/../pacman.conf"
 	fi
 fi
 
@@ -320,12 +318,6 @@ for ARCH in $req_arch; do
 		SigLevel = Never
 		LocalFileSigLevel = Optional
 
-		[krelpin]
-		SigLevel = Never
-
-		[main]
-		SigLevel = Never
-
 		EOF
 
 		if [ -n "$REPOS_FILE" ] && [ -f "$REPOS_FILE" ]; then
@@ -339,10 +331,18 @@ for ARCH in $req_arch; do
 					echo "$repo_line" >> "$PACCONF"
 				else
 					cat >> "$PACCONF" <<-EOF
+					[krelpin]
+					SigLevel = Never
 					Server = $repo_line
 					EOF
 				fi
 			done
+		elif [ -z "$REPOS_FILE" ]; then
+			cat >> "$PACCONF" <<-EOF
+			[krelpin]
+			SigLevel = Never
+			Server = file://$scriptdir/../packages/$ARCH
+			EOF
 		fi
 
 		for repo in $EXTRAREPOS; do
@@ -357,7 +357,7 @@ for ARCH in $req_arch; do
 
 	# Synchronize repositories if pacman available
 	if command -v pacman >/dev/null 2>&1; then
-		pacman --config "$PACCONF" -Sy 2>/dev/null || true
+		fakeroot pacman --config "$PACCONF" -Sy 2>/dev/null || true
 	fi
 
 	if [ "$_yaml" = "yes" ]; then

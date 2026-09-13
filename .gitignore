@@ -1,0 +1,34 @@
+# Makepkg build directories and downloaded sources
+main/*/src/
+main/*/pkg/
+main/*/*.tar.*
+main/*/*.tar
+main/*/*.tgz
+main/*/*.zip
+main/*/*.sig
+main/*/*.pkg.tar.*
+
+# Built repository packages and databases
+packages/*/*.pkg.tar.*
+packages/*/*.sig
+packages/*/*.db*
+packages/*/*.files*
+packages/**/.boot_repository
+!packages/**/.gitkeep
+
+# Output release images and rootfs tarballs
+krelpin-*.tar.gz
+krelpin-*.img
+krelpin-*.img.gz
+krelpin-*.iso
+*.iso
+*.img
+*.img.gz
+
+# Editor and temporary files
+*.tmp
+*.log
+*.orig
+*.rej
+*~
+.DS_Store

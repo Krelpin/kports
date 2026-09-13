@@ -6,7 +6,9 @@ cleanup() {
 
 tmp="$(mktemp -d)"
 trap cleanup EXIT
-scriptdir="$(dirname "$0")"
+chmod 0755 "$tmp"
+
+scriptdir="$(cd "$(dirname "$0")" && pwd -P)"
 [ -f "$scriptdir/functions.sh" ] && . "$scriptdir/functions.sh"
 
 # Mobile first default architecture: aarch64
@@ -38,25 +40,8 @@ if [ -z "$outfile" ]; then
 	outfile="krelpin-rootfs-$arch.tar.gz"
 fi
 
-# Modern glibc pacman systems use merged usr
-mkdir -p "$tmp"/usr/lib "$tmp"/usr/bin "$tmp"/usr/sbin "$tmp"/etc/pacman.d "$tmp"/var/lib/pacman "$tmp"/var/cache/pacman/pkg
-ln -sf usr/bin "$tmp"/bin
-ln -sf usr/bin "$tmp"/sbin
-ln -sf usr/lib "$tmp"/lib
-if [ "$arch" = "x86_64" ]; then
-	ln -sf usr/lib "$tmp"/lib64
-fi
-
-# Distro identification
-echo "Krelpin Linux ($arch)" > "$tmp"/etc/krelpin-release
-cat > "$tmp"/etc/os-release <<-EOF
-NAME="Krelpin Linux"
-PRETTY_NAME="Krelpin Linux ($arch)"
-ID=krelpin
-ID_LIKE=arch
-ANSI_COLOR="0;34"
-HOME_URL="https://krelpin.org"
-EOF
+# Pacman internal state directories
+mkdir -p "$tmp"/etc/pacman.d "$tmp"/var/lib/pacman "$tmp"/var/cache/pacman/pkg
 
 # Prepare pacman configuration
 conf="$tmp/etc/pacman.conf"
@@ -68,31 +53,23 @@ elif [ -n "$repositories_file" ] && [ -f "$repositories_file" ]; then
 Architecture = $arch
 CheckSpace
 SigLevel = Never
-
-[krelpin]
-SigLevel = Never
-
-[main]
-SigLevel = Never
+DBPath = $tmp/var/lib/pacman
+CacheDir = $tmp/var/cache/pacman/pkg
 
 EOF
 	cat "$repositories_file" >> "$conf"
-elif [ -f /etc/pacman.conf ]; then
-	cp /etc/pacman.conf "$conf"
 else
 	cat > "$conf" <<EOF
 [options]
 Architecture = $arch
 CheckSpace
 SigLevel = Never
+DBPath = $tmp/var/lib/pacman
+CacheDir = $tmp/var/cache/pacman/pkg
 
 [krelpin]
 SigLevel = Never
-Server = file:///var/cache/pacman/pkg
-
-[main]
-SigLevel = Never
-Server = file:///var/cache/pacman/pkg
+Server = file://$scriptdir/../packages/$arch
 EOF
 fi
 
@@ -115,12 +92,56 @@ if [ $# -eq 0 ]; then
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
-if command -v pacstrap >/dev/null 2>&1; then
-	pacstrap -C "$conf" -M -K -c -N "$tmp" "$@" 2>/dev/null || \
-	pacstrap -C "$conf" -M "$tmp" "$@" 2>/dev/null || \
-	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@" 2>/dev/null || true
-elif command -v "$PACMAN_BIN" >/dev/null 2>&1; then
-	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@" 2>/dev/null || true
+FAKEROOT="fakeroot"
+if [ "$(id -u)" -eq 0 ]; then
+	FAKEROOT=""
+fi
+
+if command -v "$PACMAN_BIN" >/dev/null 2>&1; then
+	echo "Synchronizing package repositories for $arch..."
+	$FAKEROOT "$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" -Sy
+
+	# Filter packages available in the active repository
+	available_pkgs=""
+	for p in "$@"; do
+		target="$p"
+		if $FAKEROOT "$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" -Si "$target" >/dev/null 2>&1; then
+			available_pkgs="$available_pkgs $target"
+		else
+			echo "Note: Package '$p' not found in Krelpin repository packages/$arch (build with: ./scripts/buildpkg.sh $p)"
+		fi
+	done
+
+	if [ -n "$available_pkgs" ]; then
+		echo "Installing base packages into Krelpin rootfs..."
+		$FAKEROOT "$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -S --needed --overwrite '*' $available_pkgs
+	fi
+
+	# Ensure doas symlink exists if opendoas was installed
+	if [ -f "$tmp/usr/bin/opendoas" ] && [ ! -f "$tmp/usr/bin/doas" ]; then
+		ln -sf opendoas "$tmp/usr/bin/doas"
+	fi
+
+	# Krelpin identification
+	mkdir -p "$tmp/etc"
+	echo "Krelpin Linux ($arch)" > "$tmp/etc/krelpin-release"
+	cat > "$tmp/etc/os-release" <<-EOF
+	NAME="Krelpin Linux"
+	PRETTY_NAME="Krelpin Linux ($arch)"
+	ID=krelpin
+	ID_LIKE=arch
+	ANSI_COLOR="0;34"
+	HOME_URL="https://krelpin.org"
+	EOF
+
+	# Ensure merged-usr symlinks if needed
+	[ -e "$tmp/bin" ] || ln -sf usr/bin "$tmp/bin"
+	[ -e "$tmp/sbin" ] || ln -sf usr/bin "$tmp/sbin"
+	[ -e "$tmp/lib" ] || ln -sf usr/lib "$tmp/lib"
+	[ "$arch" = "x86_64" ] && [ ! -e "$tmp/lib64" ] && ln -sf usr/lib "$tmp/lib64"
+elif command -v pacstrap >/dev/null 2>&1; then
+	echo "Installing packages with pacstrap..."
+	$FAKEROOT pacstrap -C "$conf" -M -K -c -N "$tmp" "$@" 2>/dev/null || true
 else
 	echo "Notice: Neither pacstrap nor pacman found on host. Skeleton rootfs created."
 fi
@@ -144,5 +165,6 @@ if [ -f "$tmp"/etc/shadow ]; then
 	chgrp 42 "$tmp"/etc/shadow 2>/dev/null || true
 fi
 
-tar --numeric-owner --exclude='dev/*' -c -C "$tmp" . | gzip -9n > "$outfile"
-echo "Rootfs generated: $outfile"
+echo "Archiving Krelpin rootfs into $outfile..."
+$FAKEROOT tar --numeric-owner --exclude='dev/*' -c -C "$tmp" . | gzip -9n > "$outfile"
+echo "Rootfs generated: $outfile ($(du -h "$outfile" | cut -f1))"
