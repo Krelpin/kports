@@ -1,23 +1,15 @@
-# Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
-# Contributor: Johannes Löthberg <johannes@kyriasis.com>
-# Contributor: Piotr Gorski <lucjan.lucjanov@gmail.com>
-# Contributor: Lucy <lucy@luz.lu>
-# Contributor: Bartlomiej Piotrowski <nospam@bpiotrowski.pl>
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+# Contributor: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 
 pkgname=pkgconf
-pkgver=3.0.7
+pkgver=2.3.0
 pkgrel=1
 pkgdesc="Package compiler and linker metadata toolkit"
 url="https://github.com/pkgconf/pkgconf"
 license=(ISC)
 arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
-depends=(
-  glibc
-)
-makedepends=(
-  git
-  meson
-)
+depends=(glibc)
+makedepends=(meson)
 provides=(
   libpkgconf.so
   pkg-config
@@ -26,42 +18,24 @@ provides=(
 conflicts=(pkg-config)
 replaces=(pkg-config)
 source=(
-  "git+$url#tag=pkgconf-$pkgver"
-  {x86_64,i686}-pc-linux-gnu.personality
+  "https://distfiles.ariadne.space/pkgconf/pkgconf-${pkgver}.tar.xz"
 )
-b2sums=('cd269edd8f1d121139f96a06a2a70ce31233af7be2f82aa1660cf0d5ef0f6d8d116fd99b6b06a03700ac81de1da6c17e8c688db6d1ea03836b47deff0411c6d3'
-        'c04583e19149c1035cb7777a59f0fbc4988b672d8e45105e33def3d0f9054464e33a400a3e7c7e8b99b334e4fe06aaa9d7e34662e806096d4374bd6b12d803db'
-        '94c8fd12b5f33611fd6dbeae03b20e72bcf2937e764766e2633b2fd4c14925860d57eee234016c81b0563a47b112ac9ef4a8b3bb9fa3fc0dd266f355bc156c58')
-
-prepare() {
-  cd pkgconf
-}
+sha256sums=('3a9080ac51d03615e7c1910a0a2a8df08424892b5f13b0628a204d3fcce0ea8b')
 
 build() {
-  local meson_options=(
-  )
+  meson setup build "pkgconf-${pkgver}" \
+    --prefix=/usr \
+    --buildtype=plain \
+    -Dtests=disabled
 
-  arch-meson pkgconf build "${meson_options[@]}"
   meson compile -C build
-}
-
-check() {
-  meson test -C build --print-errorlogs
 }
 
 package() {
   meson install -C build --destdir "$pkgdir"
 
-  local p
-  for p in *.personality; do
-    install -Dm644 "$p" -t "$pkgdir/usr/share/pkgconfig/personality.d"
-    ln -s pkgconf "$pkgdir/usr/bin/${p%.*}-pkg-config"
-  done
+  # Standard pkg-config symlink
+  ln -sf pkgconf "$pkgdir/usr/bin/pkg-config"
 
-  ln -s pkgconf "$pkgdir/usr/bin/pkg-config"
-  ln -s pkgconf.1 "$pkgdir/usr/share/man/man1/pkg-config.1"
-
-  install -Dm644 pkgconf/COPYING -t "$pkgdir/usr/share/licenses/$pkgname"
+  install -Dm644 "pkgconf-${pkgver}/COPYING" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
 }
-
-# vim:set sw=2 sts=-1 et:
