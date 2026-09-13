@@ -73,9 +73,13 @@ pkgver() {
 prepare() {
   cd "$pkgname"
 
+  # Reset working tree cleanly if a previous run was interrupted
+  git reset --hard "v${_git_tag}"
+  git clean -dfx
+
   # apply patch level commits on top of annotated tag
   if [[ -n ${_git_patch_level_commit} ]]; then
-    if [[ v${_git_tag} != $(git describe --tags --abbrev=0 "${_git_patch_level_commit}") ]] then
+    if [[ v${_git_tag} != $(git describe --tags --abbrev=0 "${_git_patch_level_commit}") ]]; then
       error "patch level commit ${_git_patch_level_commit} is not a descendant of v${_git_tag}"
       exit 1
     fi
