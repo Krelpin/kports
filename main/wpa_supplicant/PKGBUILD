@@ -19,12 +19,6 @@ depends=(
   pcsclite
   readline
 )
-makedepends=(
-  docbook-sgml
-  docbook-utils
-  git
-  perl-sgmls
-)
 source=(
   "git+https://git.w1.fi/hostap.git?signed#tag=hostap_${pkgver//./_}"
   wpa_supplicant_config
@@ -94,7 +88,6 @@ build() {
 
   _make
   _make eapol_test
-  _make -C doc/docbook man
 }
 
 package() {
@@ -112,12 +105,6 @@ package() {
 
   install -Dm644 dbus/dbus-wpa_supplicant.conf \
     "$pkgdir/usr/share/dbus-1/system.d/wpa_supplicant.conf"
-
-  install -Dm644 doc/docbook/*.5 -t "$pkgdir/usr/share/man/man5"
-  install -Dm644 doc/docbook/*.8 -t "$pkgdir/usr/share/man/man8"
-  rm "$pkgdir"/usr/share/man/man8/wpa_{priv,gui}.8
-
-  install -Dm644 systemd/*.service -t "$pkgdir/usr/lib/systemd/system"
 
   install -Dm644 ../README "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

@@ -1,0 +1,55 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=ncurses
+pkgver=6.5
+pkgrel=1
+pkgdesc='System V Release 4.0 curses emulation library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://invisible-island.net/ncurses/ncurses.html'
+license=('MIT')
+depends=('glibc')
+provides=('libncurses.so' 'libncursesw.so' 'libtinfo.so' 'libtinfow.so' 'libformw.so' 'libmenuw.so' 'libpanelw.so')
+source=("https://ftp.gnu.org/pub/gnu/ncurses/ncurses-${pkgver}.tar.gz")
+sha256sums=('136d91bc269a9a5785e5f9e980bc76ab57428f604ce3e5a5a90cebc767971cc6')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  ./configure \
+    --prefix=/usr \
+    --mandir=/usr/share/man \
+    --with-shared \
+    --with-normal \
+    --without-debug \
+    --without-ada \
+    --without-cxx \
+    --without-cxx-binding \
+    --with-termlib \
+    --enable-widec \
+    --enable-pc-files \
+    --with-pkg-config-libdir=/usr/lib/pkgconfig
+  make
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  # Compatibility symlinks for non-wide ncurses
+  for lib in ncurses form panel menu tinfo; do
+    echo "INPUT(-l${lib}w)" > "${pkgdir}/usr/lib/lib${lib}.so"
+    ln -sf lib${lib}w.a "${pkgdir}/usr/lib/lib${lib}.a"
+    ln -sf ${lib}w.pc "${pkgdir}/usr/lib/pkgconfig/${lib}.pc"
+  done
+
+  # Compatibility curses symlink
+  echo "INPUT(-lncursesw)" > "${pkgdir}/usr/lib/libcurses.so"
+  ln -sf libncursesw.a "${pkgdir}/usr/lib/libcurses.a"
+  ln -sf libncursesw.so "${pkgdir}/usr/lib/libcursesw.so"
+
+  install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

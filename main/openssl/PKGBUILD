@@ -1,0 +1,45 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=openssl
+pkgver=3.4.1
+pkgrel=1
+pkgdesc='The Open Source toolkit for Secure Sockets Layer and Transport Layer Security'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.openssl.org'
+license=('Apache-2.0')
+depends=('glibc')
+provides=('libcrypto.so' 'libssl.so')
+source=("https://github.com/openssl/openssl/releases/download/openssl-${pkgver}/openssl-${pkgver}.tar.gz")
+sha256sums=('002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  local target="linux-aarch64"
+  case "$CARCH" in
+    x86_64) target="linux-x86_64" ;;
+    aarch64) target="linux-aarch64" ;;
+    armv7h) target="linux-armv4" ;;
+    riscv64) target="linux64-riscv64" ;;
+  esac
+
+  ./Configure \
+    "$target" \
+    --prefix=/usr \
+    --openssldir=/etc/ssl \
+    --libdir=lib \
+    shared \
+    no-tests \
+    no-docs
+  make
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install_sw install_ssldirs
+  install -Dm644 LICENSE.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

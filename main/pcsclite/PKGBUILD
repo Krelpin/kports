@@ -1,0 +1,38 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pcsclite
+pkgver=2.5.1
+pkgrel=1
+pkgdesc="PC/SC Architecture smartcard middleware library"
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://pcsclite.apdu.fr/'
+license=('BSD-3-Clause')
+depends=('glibc')
+provides=('libpcsclite.so' 'libpcsclite_real.so' 'libpcscspy.so')
+source=("https://pcsclite.apdu.fr/files/pcsc-lite-${pkgver}.tar.xz")
+sha256sums=('bfcfe38a20afc49849c6bf55325e38f449fc4b26d3923fdc32b969ae41a8741b')
+
+build() {
+  cd "pcsc-lite-${pkgver}"
+
+  meson setup build \
+    --prefix=/usr \
+    --libdir=lib \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    -Dlibsystemd=false \
+    -Dlibudev=false \
+    -Dpolkit=false \
+    -Dusb=false
+  ninja -C build
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "pcsc-lite-${pkgver}"
+  DESTDIR="${pkgdir}" ninja -C build install
+  install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+}
