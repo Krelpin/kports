@@ -51,14 +51,10 @@ EOF
 }
 
 TARGET_PKGS=()
-NODEPS="yes"
+NODEPS="no"
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-		--deps)
-			NODEPS="no"
-			shift
-			;;
 		-a|--arch)
 			ARCH="$2"
 			shift 2
@@ -157,6 +153,18 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
 	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
 	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig"
+fi
+
+# Point makepkg to sysroot pacman so dependency checks evaluate against Krelpin's sysroot
+if [ -f "$SYSROOT/etc/pacman.conf" ]; then
+	PACMAN_WRAPPER="$(mktemp -t krelpin-pacman.XXXXXX)"
+	cat << EOF > "$PACMAN_WRAPPER"
+#!/bin/sh
+exec pacman --config "$SYSROOT/etc/pacman.conf" --root "$SYSROOT" "\$@"
+EOF
+	chmod +x "$PACMAN_WRAPPER"
+	trap 'rm -f "$PACMAN_WRAPPER"' EXIT
+	export PACMAN="$PACMAN_WRAPPER"
 fi
 
 # Ensure local packaging utilities (makepkg, repo-add) are accessible
