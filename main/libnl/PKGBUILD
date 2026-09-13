@@ -1,0 +1,34 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libnl
+pkgver=3.11.0
+pkgrel=1
+pkgdesc='Netlink Protocol Library Suite'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/thom311/libnl'
+license=('LGPL-2.1-only')
+depends=('glibc')
+provides=('libnl-3.so' 'libnl-genl-3.so' 'libnl-route-3.so')
+backup=('etc/libnl/classid' 'etc/libnl/pktloc')
+source=("https://github.com/thom311/libnl/releases/download/libnl3_${pkgver//./_}/libnl-${pkgver}.tar.gz")
+sha256sums=('2a56e1edefa3e68a7c00879496736fdbf62fc94ed3232c0baba127ecfa76874d')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --sbindir=/usr/bin \
+    --disable-static
+  make
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

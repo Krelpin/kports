@@ -1,4 +1,5 @@
-# Maintainer: Thomas Bächler <thomas@archlinux.org>
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+# Contributor: Thomas Bächler <thomas@archlinux.org>
 
 pkgname=iw
 pkgver=6.17
@@ -6,21 +7,21 @@ pkgrel=1
 pkgdesc='nl80211 based CLI configuration utility for wireless devices'
 arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 url='https://wireless.wiki.kernel.org/en/users/documentation/iw'
-license=('GPL')
-depends=('libnl')
-makedepends=('git' 'linux-api-headers')
-validpgpkeys=('C0EBC440F6DA091C884D8532E0F373F37BF9099A') # Johannes Berg
-source=("git+https://git.kernel.org/pub/scm/linux/kernel/git/jberg/iw.git?signed#tag=v${pkgver}")
-sha256sums=('25cde7e1517f2b7bae36920dc8987c95ca61c5a953d0f004fe6ece17f59980c9')
+license=('GPL-2.0-only')
+depends=('glibc' 'libnl')
+source=("https://kernel.org/pub/software/network/iw/iw-${pkgver}.tar.xz")
+sha256sums=('7d182e498289ab39b257da6780d562e415377107f50358ee5b55b8cfe40b1e33')
 
 build() {
-  cd "${srcdir}/${pkgname}/"
-
+  cd "${pkgname}-${pkgver}"
   make
 }
 
-package() {
-  cd "${srcdir}/${pkgname}/"
+check() {
+  true
+}
 
+package() {
+  cd "${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" SBINDIR="/usr/bin" install
 }

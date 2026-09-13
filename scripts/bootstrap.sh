@@ -257,7 +257,7 @@ if [ $# -eq 0 ]; then
 	set -- linux-api-headers glibc binutils gcc make file patch pkgconf \
 	   zstd libarchive curl pacman pacman-mirrorlist fakeroot tar bash coreutils \
 	   util-linux sed gawk grep diffutils findutils which kmod \
-	   xz bzip2 gzip doas openrc dhcpcd iproute2 iw wpa_supplicant \
+	   xz bzip2 gzip doas openrc dhcpcd iproute2 libnl iw \
 	   shadow e2fsprogs krelpin-keyring
 fi
 
