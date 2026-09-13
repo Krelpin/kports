@@ -2,6 +2,9 @@
 
 # Common helper functions for kports scripts
 
+# Ensure local tools are in PATH
+export PATH="$HOME/.local/bin:${scriptdir:-.}/../bin:$PATH"
+
 # Terminal colors
 if [ -t 1 ] || [ -t 2 ]; then
 	NORMAL="\033[1;0m"

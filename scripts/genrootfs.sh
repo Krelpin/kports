@@ -6,7 +6,8 @@ cleanup() {
 
 tmp="$(mktemp -d)"
 trap cleanup EXIT
-chmod 0755 "$tmp"
+scriptdir="$(dirname "$0")"
+[ -f "$scriptdir/functions.sh" ] && . "$scriptdir/functions.sh"
 
 # Mobile first default architecture: aarch64
 arch="${ARCH:-aarch64}"
