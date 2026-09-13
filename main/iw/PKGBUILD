@@ -14,7 +14,7 @@ sha256sums=('7d182e498289ab39b257da6780d562e415377107f50358ee5b55b8cfe40b1e33')
 
 build() {
   cd "${pkgname}-${pkgver}"
-  make
+  make CFLAGS="${CFLAGS} -I${PKG_CONFIG_SYSROOT_DIR}/usr/include/libnl3"
 }
 
 check() {

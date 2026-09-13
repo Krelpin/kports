@@ -158,6 +158,7 @@ build_pkg() {
 		cd "$pkgdir"
 		if [ -d "$CBUILDROOT" ]; then
 			export PKG_CONFIG_PATH="$CBUILDROOT/usr/lib/pkgconfig:$CBUILDROOT/usr/share/pkgconfig:${PKG_CONFIG_PATH:-}"
+			export PKG_CONFIG_SYSROOT_DIR="$CBUILDROOT"
 			export CFLAGS="-I$CBUILDROOT/usr/include ${CFLAGS:-}"
 			export CPPFLAGS="-I$CBUILDROOT/usr/include ${CPPFLAGS:-}"
 			export CXXFLAGS="-I$CBUILDROOT/usr/include ${CXXFLAGS:-}"
