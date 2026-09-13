@@ -51,9 +51,14 @@ EOF
 }
 
 TARGET_PKGS=()
+NODEPS="yes"
 
 while [ $# -gt 0 ]; do
 	case "$1" in
+		--deps)
+			NODEPS="no"
+			shift
+			;;
 		-a|--arch)
 			ARCH="$2"
 			shift 2
