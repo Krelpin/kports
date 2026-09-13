@@ -25,6 +25,10 @@ build() {
     --disable-ldap \
     --disable-ldaps \
     --disable-manual \
+    --without-libpsl \
+    --without-brotli \
+    --without-libidn2 \
+    --without-libssh2 \
     --with-openssl \
     --with-zstd
   make
