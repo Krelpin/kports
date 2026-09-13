@@ -227,8 +227,10 @@ CHOST=$CTARGET CARCH=$CTARGET_ARCH BOOTSTRAP=nolibc PKGBUILD=$(pkgbuildname glib
 EXTRADEPENDS_TARGET="glibc" \
 BOOTSTRAP=nobase PKGBUILD=$(pkgbuildname gcc) build_pkg $makepkg_opts
 
-# 7. Cross build tools / base-devel
-BOOTSTRAP=nobase PKGBUILD=$(pkgbuildname base-devel) build_pkg $makepkg_opts
+# 7. Cross build tools / base-devel (if recipe exists)
+if [ -f "$(pkgbuildname base-devel 2>/dev/null)" ]; then
+	BOOTSTRAP=nobase PKGBUILD=$(pkgbuildname base-devel) build_pkg $makepkg_opts
+fi
 
 msg "Cross building base system"
 
@@ -242,19 +244,19 @@ if [ "$CTARGET_ARCH" = "riscv64" ]; then
 fi
 
 if [ $# -eq 0 ]; then
-	set -- linux-api-headers glibc zlib pkgconf gmp mpfr \
-	   mpc isl zstd binutils gcc make file patch openssl \
-	   ca-certificates libarchive libcap pacman pacman-mirrorlist \
-	   base base-devel attr acl fakeroot tar bash coreutils \
-	   util-linux sed gawk grep diffutils findutils which curl kmod xz bzip2 gzip \
-	   $OPENSSH \
-	   $MKINITFS \
-	   $COMPILER_PKG \
-	   $KERNEL_PKG
+	set -- linux-api-headers glibc binutils gcc make file patch pkgconf \
+	   zstd pacman pacman-mirrorlist fakeroot tar bash coreutils \
+	   util-linux sed gawk grep diffutils findutils which curl kmod \
+	   xz bzip2 gzip doas openrc dhcpcd iproute2 iw wpa_supplicant \
+	   shadow e2fsprogs krelpin-keyring
 fi
 
 for PKG; do
-	CHOST=$CTARGET CARCH=$CTARGET_ARCH BOOTSTRAP=bootimage PKGBUILD=$(pkgbuildname "$PKG") build_pkg $makepkg_opts
+	_pkgb="$(pkgbuildname "$PKG" 2>/dev/null || true)"
+	if [ ! -f "$_pkgb" ]; then
+		continue
+	fi
+	CHOST=$CTARGET CARCH=$CTARGET_ARCH BOOTSTRAP=bootimage PKGBUILD="$_pkgb" build_pkg $makepkg_opts
 
 	case "$PKG" in
 	linux-api-headers|glibc)

@@ -19,13 +19,11 @@ depends=(
   gettext
   glibc
   gnupg
-  gpgme libgpgme.so
+  gpgme
   grep
-  libarchive libarchive.so
-  openssl libcrypto.so
+  libarchive
+  openssl
   pacman-mirrorlist
-  systemd
-  libmakepkg-dropins
 )
 makedepends=(
   asciidoc
@@ -135,14 +133,6 @@ package() {
   install -D -m644 "$srcdir/alpm.sysusers" "${pkgdir}"/usr/lib/sysusers.d/alpm.conf
   install -m644 "$srcdir/fortran.conf" "$pkgdir/etc/makepkg.conf.d"
   install -m644 "$srcdir/rust.conf" "$pkgdir/etc/makepkg.conf.d"
-
-  local wantsdir="$pkgdir/usr/lib/systemd/system/sockets.target.wants"
-  install -dm755 "$wantsdir"
-
-  local unit
-  for unit in dirmngr gpg-agent gpg-agent-{browser,extra,ssh} keyboxd; do
-    ln -s "../${unit}@.socket" "$wantsdir/${unit}@etc-pacman.d-gnupg.socket"
-  done
 }
 
 # vim: set ts=2 sw=2 et:
