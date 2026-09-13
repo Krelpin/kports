@@ -152,7 +152,7 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	export LDFLAGS="--sysroot=$SYSROOT ${LDFLAGS:-}"
 	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
 	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
-	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig"
+	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/aarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig"
 	export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:$SYSROOT/usr/lib:${LD_LIBRARY_PATH:-}"
 fi
 
