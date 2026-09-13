@@ -319,10 +319,10 @@ profile_standard() {
 	# 2. Core Utilities & System Base
 	local _coreutils="coreutils bash pacman pacman-mirrorlist krelpin-keyring
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils
-		file which curl util-linux iproute2 kmod shadow sudo e2fsprogs"
+		file which curl util-linux iproute2 kmod shadow doas e2fsprogs"
 
-	# 3. Mobile Hardware & Networking
-	local _mobile="iw wpa_supplicant dhcpcd tzdata"
+	# 3. Mobile Hardware, OpenRC Init & Networking
+	local _mobile="openrc dhcpcd iw wpa_supplicant tzdata"
 
 	pkgs="$_toolchain $_coreutils $_mobile"
 	apks="$pkgs"

@@ -104,13 +104,13 @@ if [ -d "$keys_dir" ]; then
 	cp -a "$keys_dir"/* "$tmp/etc/pacman.d/gnupg/" 2>/dev/null || true
 fi
 
-# Default packages: Toolchains + Coreutils & Base System
+# Default packages: Toolchains + Coreutils & Base System + OpenRC & Networking
 if [ $# -eq 0 ]; then
 	set -- glibc gcc binutils linux-api-headers make patch pkgconf \
 		coreutils bash pacman pacman-mirrorlist krelpin-keyring \
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
-		file which curl util-linux iproute2 kmod shadow sudo e2fsprogs \
-		iw wpa_supplicant dhcpcd
+		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
+		openrc dhcpcd iw wpa_supplicant
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
