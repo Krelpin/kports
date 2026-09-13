@@ -111,6 +111,7 @@ build() {
 
   meson setup build "$pkgname" \
         --prefix=/usr \
+        --libdir=/usr/lib \
         --buildtype=plain \
         -Ddoc=disabled \
         -Ddoxygen=disabled \
@@ -125,9 +126,7 @@ check() {
 }
 
 package() {
-  cd "$pkgname"
-
-  DESTDIR="$pkgdir" meson install -C build
+  meson install -C "$srcdir/build" --destdir "$pkgdir"
 
   # install Arch specific stuff
   install -dm755 "$pkgdir/etc"
