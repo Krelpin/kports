@@ -23,36 +23,40 @@ EOF
 		;;
 esac
 
-makepkg_opts="-f --noconfirm --skippgpcheck --nocheck -d"
-if [ "$1" = "-k" ] || [ "$1" = "--keep" ]; then
-	makepkg_opts="$makepkg_opts --holdver"
-	shift
-fi
+REBUILD="no"
+makepkg_opts="--noconfirm --skippgpcheck --nocheck -d"
+CTARGET=""
 
-CTARGET="$1"
-CHOST="${CBUILD}"
-CARCH="${CBUILD_ARCH}"
-SUDO_PACMAN="${SUDO_PACMAN:-pacman}"
-if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
-	SUDO_PACMAN="sudo $SUDO_PACMAN"
-fi
-
-[ $# -gt 0 ] && shift
-
-# optional cross build packages
-#: ${KERNEL_PKG="linux-firmware linux"}
-#: ${OPENSSH="openssh"}
-#: ${MKINITFS="libcap-ng ncurses readline sqlite util-linux libaio lvm2 popt xz json-c argon2 cryptsetup kmod mkinitcpio"}
-# Some languages that need to be cross compiled
-: ${GO="community/go"}
-: ${LLVM_DEPS="libffi brotli libev c-ares cunit nghttp2 nghttp3 libidn2 libunistring libpsl curl libssh2 libxml2"}
-: ${RUST="llvm rust"}
-#: ${COMPILER_PKG="$GO $LLVM_DEPS $RUST"}
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-f|--force)
+			REBUILD="yes"
+			makepkg_opts="-f $makepkg_opts"
+			shift
+			;;
+		-k|--keep)
+			makepkg_opts="$makepkg_opts --holdver"
+			shift
+			;;
+		-*)
+			shift
+			;;
+		*)
+			if [ -z "$CTARGET" ]; then
+				CTARGET="$1"
+			fi
+			shift
+			;;
+	esac
+done
 
 if [ -z "$CTARGET" ]; then
 	CTARGET="aarch64"
 	echo "No target architecture specified; defaulting to aarch64 (mobile primary target)."
 fi
+
+CHOST="${CBUILD}"
+CARCH="${CBUILD_ARCH}"
 
 
 scriptdir="$(dirname "$0")"
@@ -131,12 +135,28 @@ build_pkg() {
 		shift
 	fi
 	local pkgdir="$(dirname "$pkgbuild")"
+	local pkgname="$(basename "$pkgdir")"
 	if [ ! -f "$pkgbuild" ]; then
 		die "PKGBUILD not found: $pkgbuild"
 	fi
+
+	# Check if package already exists in Krelpin repository
+	local existing_pkg=""
+	if [ -d "$KPORTS/packages/$CTARGET_ARCH" ]; then
+		existing_pkg=$(find "$KPORTS/packages/$CTARGET_ARCH" -name "${pkgname}-[0-9]*.pkg.tar.*" 2>/dev/null | head -n1 || true)
+	fi
+
+	if [ -n "$existing_pkg" ] && [ "$REBUILD" != "yes" ]; then
+		msg "Package '$pkgname' already exists: $(basename "$existing_pkg") (skipping build, use -f to force)"
+		if [ -d "$CBUILDROOT" ]; then
+			fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --needed --overwrite '*' --nodeps "$existing_pkg" 2>/dev/null || true
+		fi
+		return 0
+	fi
+
 	(
 		cd "$pkgdir"
-		msg "Building $(basename "$pkgdir") with makepkg..."
+		msg "Building $pkgname with makepkg..."
 		makepkg "$@"
 		if [ -d "$CBUILDROOT" ]; then
 			for pkgfile in *.pkg.tar.*; do
