@@ -1,0 +1,44 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libarchive
+pkgver=3.7.7
+pkgrel=1
+pkgdesc='Multi-format archive and compression library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.libarchive.org/'
+license=('BSD-2-Clause')
+depends=(
+  'glibc'
+  'bzip2'
+  'xz'
+  'zstd'
+)
+provides=('libarchive.so')
+source=("https://github.com/libarchive/libarchive/releases/download/v${pkgver}/libarchive-${pkgver}.tar.gz")
+sha256sums=('4cc540a3e9a1eebdefa1045d2e4184831100667e6d7d5b315bb1cbc951f8ddff')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  ./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --without-xml2 \
+    --without-expat \
+    --without-cng \
+    --without-nettle \
+    --without-openssl \
+    --with-zstd \
+    --with-bz2lib \
+    --with-lzma
+  make
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

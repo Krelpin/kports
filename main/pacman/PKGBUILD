@@ -102,6 +102,13 @@ prepare() {
 }
 
 build() {
+  if [ -n "$CBUILDROOT" ] && [ -d "$CBUILDROOT/usr/lib/pkgconfig" ]; then
+    export PKG_CONFIG_PATH="$CBUILDROOT/usr/lib/pkgconfig:$CBUILDROOT/usr/share/pkgconfig:${PKG_CONFIG_PATH:-}"
+  fi
+
+  # Clean any previous build directory
+  rm -rf build
+
   meson setup build "$pkgname" \
         --prefix=/usr \
         --buildtype=plain \

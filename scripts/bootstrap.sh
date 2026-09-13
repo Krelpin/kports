@@ -247,8 +247,8 @@ fi
 
 if [ $# -eq 0 ]; then
 	set -- linux-api-headers glibc binutils gcc make file patch pkgconf \
-	   zstd pacman pacman-mirrorlist fakeroot tar bash coreutils \
-	   util-linux sed gawk grep diffutils findutils which curl kmod \
+	   zstd libarchive curl pacman pacman-mirrorlist fakeroot tar bash coreutils \
+	   util-linux sed gawk grep diffutils findutils which kmod \
 	   xz bzip2 gzip doas openrc dhcpcd iproute2 iw wpa_supplicant \
 	   shadow e2fsprogs krelpin-keyring
 fi
