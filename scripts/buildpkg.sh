@@ -1,6 +1,7 @@
 #!/bin/bash
 # buildpkg.sh - Build and package Krelpin Linux packages from source
 # Target focus: aarch64 (primary mobile target), x86_64, armv7h, riscv64
+# Enforces Krelpin's own isolated toolchain (Host toolchains disabled by default)
 # Manages local pacman binary repository at packages/$ARCH/krelpin.db.tar.zst
 
 set -e
@@ -17,31 +18,32 @@ CLEAN="no"
 SIGN="no"
 ALL_PKGS="no"
 SYNC_DEST=""
-
-# Setup environment for local tools and libraries
-export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-[ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib:${LIBRARY_PATH:-}"
-[ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib:${LD_LIBRARY_PATH:-}"
+SYSROOT=""
+ALLOW_HOST_TOOLCHAIN="no"
+CHROOT_MODE="no"
 
 usage() {
 	cat <<EOF
 Usage: $0 [options] [package1 package2 ...]
 
 Options:
-  -a, --arch <arch>      Target architecture (default: aarch64)
-  -d, --nodeps           Skip dependency checks during build (useful during bootstrap)
-      --nocheck          Skip running test suites check() (default: enabled for speed)
-      --check            Run test suites check()
-  -f, --force            Rebuild package even if it already exists in repository
-  -c, --clean            Clean build directory (pkg/ and src/) after build
-  -s, --sign             Sign package with GPG
-      --all              Build all packages in main/
-      --sync-to <dest>   Sync repository to remote mirror (rsync destination)
-  -h, --help             Show this help message
+  -a, --arch <arch>         Target architecture (default: aarch64)
+      --sysroot <dir>       Path to Krelpin isolated sysroot (default: sysroot-<arch>)
+      --chroot              Build inside an isolated namespace/container (via bwrap)
+      --host-toolchain      Allow fallback to host system compiler (NOT recommended)
+  -d, --nodeps              Skip dependency checks during build
+      --nocheck             Skip running test suites check() (default: enabled for speed)
+      --check               Run test suites check()
+  -f, --force               Rebuild package even if it already exists in repository
+  -c, --clean               Clean build directory (pkg/ and src/) after build
+  -s, --sign                Sign package with GPG
+      --all                 Build all packages in main/
+      --sync-to <dest>      Sync repository to remote mirror (rsync destination)
+  -h, --help                Show this help message
 
 Examples:
   $0 bash
-  $0 --nodeps glibc gcc binutils
+  $0 --sysroot /path/to/sysroot-aarch64 coreutils
   $0 --all
   $0 --sync-to user@mirror.krelpin.org:/var/www/mirror/krelpin/
 EOF
@@ -55,6 +57,18 @@ while [ $# -gt 0 ]; do
 		-a|--arch)
 			ARCH="$2"
 			shift 2
+			;;
+		--sysroot)
+			SYSROOT="$2"
+			shift 2
+			;;
+		--chroot)
+			CHROOT_MODE="yes"
+			shift
+			;;
+		--host-toolchain)
+			ALLOW_HOST_TOOLCHAIN="yes"
+			shift
 			;;
 		-d|--nodeps)
 			NODEPS="yes"
@@ -105,6 +119,46 @@ done
 REPO_DIR="$kports_root/packages/$ARCH"
 mkdir -p "$REPO_DIR"
 
+if [ -z "$SYSROOT" ]; then
+	SYSROOT="$kports_root/sysroot-$ARCH"
+fi
+
+# Toolchain isolation verification
+if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
+	if [ ! -d "$SYSROOT" ] || [ ! -x "$SYSROOT/usr/bin/gcc" ]; then
+		echo "================================================================="
+		echo " ERROR: Krelpin isolated toolchain not found at:"
+		echo "   $SYSROOT"
+		echo ""
+		echo " Host system toolchains are strictly prohibited!"
+		echo " To build Krelpin's own toolchain (linux-api-headers, glibc, gcc), run:"
+		echo "   ./scripts/bootstrap.sh $ARCH"
+		echo ""
+		echo " (For temporary debugging only, pass --host-toolchain to override)"
+		echo "================================================================="
+		exit 1
+	fi
+
+	echo ">>> Using Krelpin toolchain from: $SYSROOT"
+	export PATH="$SYSROOT/usr/bin:$PATH"
+	export CC="$SYSROOT/usr/bin/gcc --sysroot=$SYSROOT"
+	export CXX="$SYSROOT/usr/bin/g++ --sysroot=$SYSROOT"
+	export AR="$SYSROOT/usr/bin/ar"
+	export RANLIB="$SYSROOT/usr/bin/ranlib"
+	export LD="$SYSROOT/usr/bin/ld --sysroot=$SYSROOT"
+	export CFLAGS="--sysroot=$SYSROOT ${CFLAGS:-}"
+	export CXXFLAGS="--sysroot=$SYSROOT ${CXXFLAGS:-}"
+	export LDFLAGS="--sysroot=$SYSROOT ${LDFLAGS:-}"
+	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
+	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
+	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig"
+fi
+
+# Ensure local packaging utilities (makepkg, repo-add) are accessible
+export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+[ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib:${LIBRARY_PATH:-}"
+[ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib:${LD_LIBRARY_PATH:-}"
+
 if [ -n "$SYNC_DEST" ] && [ ${#TARGET_PKGS[@]} -eq 0 ] && [ "$ALL_PKGS" != "yes" ]; then
 	echo ">>> Syncing Krelpin $ARCH repository to $SYNC_DEST..."
 	rsync -avzP --delete "$REPO_DIR/" "$SYNC_DEST/$ARCH/"
@@ -130,6 +184,7 @@ fi
 echo "================================================================="
 echo " Krelpin Linux Package Builder"
 echo " Architecture : $ARCH"
+echo " Sysroot      : $SYSROOT"
 echo " Repository   : $REPO_DIR"
 echo " Packages     : ${TARGET_PKGS[*]}"
 echo "================================================================="
@@ -173,8 +228,20 @@ for pkg in "${TARGET_PKGS[@]}"; do
 		fi
 	fi
 
-	# Run makepkg
-	CARCH="$ARCH" CARCH_TARGET="$ARCH" makepkg "${MAKEPKG_ARGS[@]}"
+	# Run makepkg in isolated environment
+	if [ "$CHROOT_MODE" = "yes" ] && command -v bwrap >/dev/null 2>&1; then
+		echo ">>> Executing build inside isolated namespace container (bwrap)..."
+		bwrap --ro-bind "$SYSROOT" / \
+			--bind "$pkg_dir" "$pkg_dir" \
+			--proc /proc \
+			--dev /dev \
+			--tmpfs /tmp \
+			--dir "$HOME" \
+			--chdir "$pkg_dir" \
+			CARCH="$ARCH" CARCH_TARGET="$ARCH" makepkg "${MAKEPKG_ARGS[@]}"
+	else
+		CARCH="$ARCH" CARCH_TARGET="$ARCH" makepkg "${MAKEPKG_ARGS[@]}"
+	fi
 
 	# Find generated packages
 	pkg_files=(*.pkg.tar.*)

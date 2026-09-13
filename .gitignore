@@ -25,6 +25,9 @@ krelpin-*.iso
 *.img
 *.img.gz
 
+# Toolchain bootstrap sysroots
+sysroot-*/
+
 # Editor and temporary files
 *.tmp
 *.log

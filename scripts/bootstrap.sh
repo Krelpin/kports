@@ -23,7 +23,7 @@ EOF
 		;;
 esac
 
-makepkg_opts="-s --noconfirm"
+makepkg_opts="-f --noconfirm --skippgpcheck --nocheck -d"
 if [ "$1" = "-k" ] || [ "$1" = "--keep" ]; then
 	makepkg_opts="$makepkg_opts --holdver"
 	shift
@@ -95,12 +95,10 @@ case "$CTARGET" in
 		;;
 esac
 
-[ -z "$CBUILD_ARCH" ] && die "Unable to detect CBUILD_ARCH"
-[ -z "$CBUILDROOT" ] && die "CBUILDROOT not set for $CTARGET_ARCH"
-export CBUILD CBUILD_ARCH CHOST CARCH CTARGET CTARGET_ARCH
-
 # deduce kports directory
-[ -z "$KPORTS" ] && KPORTS="${APORTS:-$(realpath "$scriptdir"/../)}"
+[ -z "$KPORTS" ] && KPORTS="${APORTS:-$(cd "$scriptdir/.." && pwd -P)}"
+CBUILDROOT="${CBUILDROOT:-$KPORTS/sysroot-$CTARGET_ARCH}"
+export CBUILD CBUILD_ARCH CHOST CARCH CTARGET CTARGET_ARCH CBUILDROOT KPORTS
 
 pkgbuildname() {
 	local repo="${1%%/*}"
@@ -136,10 +134,15 @@ build_pkg() {
 		msg "Building $(basename "$pkgdir") with makepkg..."
 		makepkg "$@"
 		if [ -d "$CBUILDROOT" ]; then
-			for pkgfile in *.pkg.tar.zst *.pkg.tar.xz; do
+			for pkgfile in *.pkg.tar.*; do
 				[ -f "$pkgfile" ] || continue
+				case "$pkgfile" in *.sig) continue ;; esac
 				msg "Installing $pkgfile into $CBUILDROOT..."
-				$SUDO_PACMAN -U --noconfirm --root "$CBUILDROOT" --nodeps "$pkgfile" 2>/dev/null || true
+				fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --overwrite '*' --nodeps "$pkgfile" 2>/dev/null || true
+				# Also register into Krelpin binary repository
+				mkdir -p "$KPORTS/packages/$CTARGET_ARCH"
+				cp -f "$pkgfile" "$KPORTS/packages/$CTARGET_ARCH/"
+				repo-add "$KPORTS/packages/$CTARGET_ARCH/krelpin.db.tar.zst" "$KPORTS/packages/$CTARGET_ARCH/$pkgfile" 2>/dev/null || true
 			done
 		fi
 	)
@@ -165,8 +168,15 @@ if [ ! -d "$CBUILDROOT" ]; then
 		ln -sf usr/lib "$CBUILDROOT"/lib64
 	fi
 
-	# Initialize pacman database in sysroot
+	# Initialize pacman database and conf in sysroot
 	mkdir -p "$CBUILDROOT"/var/lib/pacman/local
+	cat > "$CBUILDROOT"/etc/pacman.conf <<-EOF
+	[options]
+	Architecture = $CTARGET_ARCH
+	SigLevel = Never
+	DBPath = $CBUILDROOT/var/lib/pacman
+	CacheDir = $CBUILDROOT/var/cache/pacman/pkg
+	EOF
 fi
 
 msg "Building cross-compiler"
