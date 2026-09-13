@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libcap
+pkgver=2.73
+pkgrel=1
+pkgdesc='POSIX 1003.1e capabilities library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://sites.google.com/site/fullycapable/'
+license=('GPL-2.0-only' 'BSD-3-Clause')
+depends=('glibc')
+provides=('libcap.so' 'libpsx.so')
+source=("https://kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${pkgver}.tar.xz")
+sha256sums=('6405f6089cf4cdd8c271540cd990654d78dd0b1989b2d9bda20f933a75a795a5')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  make prefix=/usr lib=lib SBINDIR=/usr/bin GOLANG=no RAISE_SETFCAP=no
+}
+
+check() {
+  true
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make prefix=/usr lib=lib SBINDIR=/usr/bin GOLANG=no RAISE_SETFCAP=no DESTDIR="${pkgdir}" install
+}

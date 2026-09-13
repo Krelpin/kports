@@ -13,7 +13,7 @@ pkgdesc='Dependency based init system for Krelpin Linux'
 arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 url='https://github.com/OpenRC/openrc'
 license=('BSD-2-Clause')
-depends=('glibc')
+depends=('glibc' 'libcap')
 makedepends=('meson')
 provides=('librc.so' 'init-rc' 'libeinfo.so' 'svc-manager')
 backup=(etc/inittab
@@ -45,6 +45,7 @@ build() {
         -Dbash-completions=true      \
         -Dbranding='"Krelpin Linux"' \
         -Dpam=false                  \
+        -Daudit=disabled             \
         -Dpkg_prefix=''              \
         -Dpkgconfig=true             \
         -Dselinux=disabled           \
