@@ -141,7 +141,7 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	fi
 
 	echo ">>> Using Krelpin toolchain from: $SYSROOT"
-	export PATH="$SYSROOT/usr/bin:$PATH"
+	export PATH="$PATH:$SYSROOT/usr/bin"
 	export CC="$SYSROOT/usr/bin/gcc --sysroot=$SYSROOT -B/usr/bin/"
 	export CXX="$SYSROOT/usr/bin/g++ --sysroot=$SYSROOT -B/usr/bin/"
 	export AR="$SYSROOT/usr/bin/ar"
