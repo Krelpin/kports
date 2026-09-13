@@ -31,7 +31,8 @@ sha256sums=('ce2017e059d63e67ddb9240e9d4ec49c2893605035cd60e92ad53177f4377237'
 validpgpkeys=(3A24BC1E8FB409FA9F14371813FCEF89DD9E3C4F)
 
 prepare() {
-  mkdir -p binutils-build
+  rm -rf "${srcdir}/binutils-build"
+  mkdir -p "${srcdir}/binutils-build"
   cd binutils-${pkgver}
 
   # Turn off development mode
@@ -39,7 +40,7 @@ prepare() {
 }
 
 build() {
-  cd binutils-build
+  cd "${srcdir}/binutils-build"
 
   local _conf_opts=()
   if [ -n "$CBUILDROOT" ] && [ -d "$CBUILDROOT" ]; then
@@ -61,6 +62,7 @@ build() {
     --enable-threads \
     --disable-gdb \
     --disable-gdbserver \
+    --disable-gprofng \
     --disable-sim \
     --disable-werror \
     --with-pic \
