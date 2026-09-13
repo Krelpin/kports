@@ -7,7 +7,11 @@
 # NOTE: valgrind requires rebuilt with each major glibc version
 
 pkgbase=glibc
-pkgname=(glibc lib32-glibc glibc-locales)
+if [[ "${CARCH:-$(uname -m)}" != "x86_64" ]]; then
+  pkgname=(glibc glibc-locales)
+else
+  pkgname=(glibc lib32-glibc glibc-locales)
+fi
 pkgver=2.44+r24+g16be1518495f
 _commit=16be1518495f1fa05481b0182c4e4c24927c62df
 pkgrel=1
@@ -69,23 +73,29 @@ pkgver() {
 }
 
 prepare() {
-  mkdir -p glibc-build lib32-glibc-build
+  rm -rf "${srcdir}/glibc-build" "${srcdir}/lib32-glibc-build"
+  mkdir -p "${srcdir}/glibc-build"
 
   [[ -d glibc-$pkgver ]] && ln -s glibc-$pkgver glibc
   cd glibc
 }
 
 build() {
+  local _headers_dir="/usr/include"
+  if [ -n "$CBUILDROOT" ] && [ -d "$CBUILDROOT/usr/include" ]; then
+    _headers_dir="$CBUILDROOT/usr/include"
+  fi
+
   local _configure_flags=(
       --prefix=/usr
-      --with-headers=/usr/include
-      --with-bugurl=https://gitlab.archlinux.org/archlinux/packaging/packages/glibc/-/issues
+      --with-headers="$_headers_dir"
+      --with-bugurl=https://krelpin.org
       --enable-bind-now
       --enable-fortify-source
       --enable-kernel=4.4
       --enable-multi-arch
       --enable-stack-protector=strong
-      --enable-systemtap
+      --disable-systemtap
       --disable-nscd
       --disable-profile
       --disable-werror
@@ -101,18 +111,23 @@ build() {
   fi
 
   (
-    cd glibc-build
+    cd "${srcdir}/glibc-build"
 
     echo "slibdir=/usr/lib" >> configparms
     echo "rtlddir=/usr/lib" >> configparms
     echo "sbindir=/usr/bin" >> configparms
     echo "rootsbindir=/usr/bin" >> configparms
 
+    local _extra_flags=()
+    if [[ ${CARCH} == "x86_64" ]]; then
+      _extra_flags+=(--enable-cet)
+    fi
+
     "${srcdir}"/glibc/configure \
         --libdir=/usr/lib \
         --libexecdir=/usr/lib \
-        --enable-cet \
         --enable-sframe \
+        "${_extra_flags[@]}" \
         "${_configure_flags[@]}"
 
     make -O
