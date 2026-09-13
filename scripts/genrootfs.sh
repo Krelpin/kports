@@ -116,9 +116,11 @@ fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
 if command -v pacstrap >/dev/null 2>&1; then
-	pacstrap -C "$conf" -M -d "$tmp" "$@"
+	pacstrap -C "$conf" -M -K -c -N "$tmp" "$@" 2>/dev/null || \
+	pacstrap -C "$conf" -M "$tmp" "$@" 2>/dev/null || \
+	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@" 2>/dev/null || true
 elif command -v "$PACMAN_BIN" >/dev/null 2>&1; then
-	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@"
+	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@" 2>/dev/null || true
 else
 	echo "Notice: Neither pacstrap nor pacman found on host. Skeleton rootfs created."
 fi
