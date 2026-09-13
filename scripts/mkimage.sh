@@ -96,7 +96,7 @@ options:
 --arch			Specify target architecture: aarch64 (mobile primary), x86_64, armv7, riscv64
 			(default: $default_arch)
 --profile		Specify which profiles to build (default: standard)
---format		Image output format: rootfs (default), img (raw disk), iso (hybrid ISO)
+--format		Image output format: rootfs (default, mobile tarball), img (flashable raw disk)
 --hostkeys		Copy system pacman/gnupg signing keys to created images
 --outdir		Specify directory for the created images (default: $OUTDIR)
 --repositories-file	List of repositories / pacman.conf to use for the image create
