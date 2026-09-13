@@ -180,16 +180,16 @@ msg() {
 	printf "${prompt} ${name}: %s\n" "$1" >&2
 }
 
-if [ ! -d "$CBUILDROOT" ]; then
-	msg "Creating sysroot in $CBUILDROOT"
+if [ ! -f "$CBUILDROOT/etc/pacman.conf" ]; then
+	msg "Initializing sysroot in $CBUILDROOT"
 	mkdir -p "$CBUILDROOT"/etc/pacman.d/gnupg "$CBUILDROOT"/var/lib/pacman "$CBUILDROOT"/var/cache/pacman/pkg
 
 	# Usr-merged directory structure
-	mkdir -p "$CBUILDROOT"/usr/lib "$CBUILDROOT"/usr/bin "$CBUILDROOT"/usr/sbin
-	ln -sf usr/bin "$CBUILDROOT"/bin
-	ln -sf usr/bin "$CBUILDROOT"/sbin
-	ln -sf usr/lib "$CBUILDROOT"/lib
-	if [ "$CTARGET_ARCH" = "x86_64" ]; then
+	mkdir -p "$CBUILDROOT"/usr/lib "$CBUILDROOT"/usr/bin "$CBUILDROOT"/usr/sbin "$CBUILDROOT"/usr/include
+	[ ! -e "$CBUILDROOT"/bin ] && ln -sf usr/bin "$CBUILDROOT"/bin
+	[ ! -e "$CBUILDROOT"/sbin ] && ln -sf usr/bin "$CBUILDROOT"/sbin
+	[ ! -e "$CBUILDROOT"/lib ] && ln -sf usr/lib "$CBUILDROOT"/lib
+	if [ "$CTARGET_ARCH" = "x86_64" ] && [ ! -e "$CBUILDROOT"/lib64 ]; then
 		ln -sf usr/lib "$CBUILDROOT"/lib64
 	fi
 
