@@ -9,6 +9,9 @@ main/*/*.sig
 main/*/*.pkg.tar.*
 main/glibc/glibc/
 main/gcc/gcc/
+main/pacman/pacman/
+main/pacman/patch-reproducible-builds.patch
+main/pacman/revertme-makepkg-remove-libdepends-and-libprovides.patch
 
 # Built repository packages and databases
 packages/*/*.pkg.tar.*
