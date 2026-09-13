@@ -153,6 +153,7 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
 	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
 	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig"
+	export LD_LIBRARY_PATH="$SYSROOT/usr/lib:$SYSROOT/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
 fi
 
 # Point makepkg to sysroot pacman so dependency checks evaluate against Krelpin's sysroot
