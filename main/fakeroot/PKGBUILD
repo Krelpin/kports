@@ -16,6 +16,7 @@ sha256sums=('86b0b75bf319ca42e525c098675b6ed10a06b76e69ec9ccf20ef5e03883b3a14')
 build() {
   cd "${pkgname}-${pkgver}"
 
+  CFLAGS+=" -include linux/capability.h"
   ./configure \
     --prefix=/usr \
     --libdir=/usr/lib/libfakeroot \
