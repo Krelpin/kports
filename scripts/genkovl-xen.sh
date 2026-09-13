@@ -1,1 +1,0 @@
-genapkovl-xen.sh

@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# mkimage.sh - Tool for building bootable images for pacman/glibc systems
-# Ported 1:1 from Alpine aports mkimage.sh to pacman-based glibc architecture
+# mkimage.sh - Tool for building bootable images & rootfs for Krelpin Linux
+# Architecture focus: aarch64 (primary mobile target), x86_64, armv7, riscv64
+# Package system: pacman + glibc
 
 set -e
 
@@ -36,7 +37,11 @@ all_profiles=""
 all_checksums="sha256 sha512"
 all_dirs=""
 build_date="$(date -u +%y%m%d -d "@$SOURCE_DATE_EPOCH")"
-default_arch="$(pacman-conf Architecture 2>/dev/null || uname -m)"
+
+# Mobile-first default: aarch64 (with multi-architecture support)
+default_arch="${DEFAULT_ARCH:-aarch64}"
+distro_name="krelpin"
+
 _hostkeys=""
 _simulate=""
 _checksum=""
@@ -81,21 +86,23 @@ usage() {
 	cat <<EOF
 
 $0	[--tag RELEASE] [--outdir OUTDIR] [--workdir WORKDIR]
-		[--arch ARCH] [--profile PROFILE] [--hostkeys] [--simulate]
+		[--arch ARCH] [--profile PROFILE] [--format FORMAT]
+		[--hostkeys] [--simulate]
 		[--repository REPO [--repository REPO]]
 		[--repositories-file REPO_FILE] [--yaml]
 $0	--help
 
 options:
---arch			Specify which architecture images to build
+--arch			Specify target architecture: aarch64 (mobile primary), x86_64, armv7, riscv64
 			(default: $default_arch)
+--profile		Specify which profiles to build (default: standard)
+--format		Image output format: rootfs (default), img (raw disk), iso (hybrid ISO)
 --hostkeys		Copy system pacman/gnupg signing keys to created images
---outdir		Specify directory for the created images
---profile		Specify which profiles to build
+--outdir		Specify directory for the created images (default: $OUTDIR)
 --repositories-file	List of repositories / pacman.conf to use for the image create
 --repository		Package repository URL or path to use for the image create
 --simulate		Don't execute commands
---tag			Build images for tag RELEASE
+--tag			Build images for tag RELEASE (default: $RELEASE)
 --workdir		Specify temporary working directory (cache)
 --yaml			Write YAML metadata file (latest-releases.yaml)
 
@@ -158,7 +165,7 @@ build_profile() {
 	profile_$PROFILE
 	list_has "$ARCH" $arch || return 0
 
-	msg "Building $PROFILE"
+	msg "Building $PROFILE ($ARCH)"
 
 	# Collect list of needed sections, and make sure they are built
 	for SECTION in $all_sections; do
@@ -166,11 +173,11 @@ build_profile() {
 	done
 
 	# Defaults
-	[ -n "$image_name" ] || image_name="${distro_name:-kports}-${PROFILE}"
+	[ -n "$image_name" ] || image_name="${distro_name}-${PROFILE}"
 	[ -n "$output_filename" ] || output_filename="${image_name}-${RELEASE}-${ARCH}.${image_ext}"
 	local output_file="${OUTDIR:-.}/$output_filename"
 
-	# Construct final image
+	# Construct final image filesystem
 	local _imgid
 	_imgid=$(echo -n "$_my_sections" | tr ' ' '\n' | sort | tr '\n' ' ' | checksum)
 	DESTDIR="$WORKDIR/image-$_imgid-$ARCH-$PROFILE"
@@ -185,8 +192,7 @@ build_profile() {
 					[ ! -e "$_fn" ] || cp -Lrs "$_fn" "$DESTDIR"/
 				done
 			done
-			echo "${image_name}-${RELEASE} ${build_date}" > "$DESTDIR"/.kports-release
-			echo "${image_name}-${RELEASE} ${build_date}" > "$DESTDIR"/.alpine-release
+			echo "${distro_name}-${PROFILE}-${RELEASE} ${build_date}" > "$DESTDIR"/.krelpin-release
 		fi
 	fi
 
@@ -239,6 +245,7 @@ while [ $# -gt 0 ]; do
 	--tag) RELEASE="$1"; shift ;;
 	--arch) req_arch="$1"; shift ;;
 	--profile) req_profiles="$1"; shift ;;
+	--format) IMAGE_FORMAT="$1"; export IMAGE_FORMAT; shift ;;
 	--hostkeys) _hostkeys="--hostkeys";;
 	--simulate) _simulate="yes";;
 	--checksum) _checksum="yes";;
@@ -259,8 +266,11 @@ if [ -z "$RELEASE" ]; then
 fi
 
 if [ -z "$REPOS" ] && [ -z "$REPOS_FILE" ]; then
-	echo "Must provide --repository or --repositories-file"
-	exit 2
+	# Default local/workspace fallback if no remote repo given
+	REPOS_FILE="$scriptdir/../pacman.conf"
+	if [ ! -f "$REPOS_FILE" ]; then
+		REPOS="file:///var/cache/pacman/pkg"
+	fi
 fi
 
 # setup defaults
@@ -268,10 +278,11 @@ if [ -z "$WORKDIR" ]; then
 	WORKDIR="$(mktemp -d -t mkimage.XXXXXX)"
 	trap 'rm -rf "$WORKDIR"' INT EXIT
 fi
-req_profiles=${req_profiles:-${all_profiles}}
+
+req_profiles=${req_profiles:-${all_profiles:-standard}}
 req_arch=${req_arch:-${default_arch}}
-[ "$req_arch" != "all" ] || req_arch="${all_arch}"
-[ "$req_profiles" != "all" ] || req_profiles="${all_profiles}"
+[ "$req_arch" != "all" ] || req_arch="aarch64 x86_64 armv7 riscv64"
+[ "$req_profiles" != "all" ] || req_profiles="${all_profiles:-standard}"
 
 mkdir -p "$OUTDIR"
 
@@ -279,19 +290,17 @@ mkdir -p "$OUTDIR"
 _pub=${PACKAGER_PRIVKEY:+${PACKAGER_PRIVKEY}.pub}
 _packager_pubkey="${PACKAGER_PUBKEY:-$_pub}"
 
-# create images
+# create images for each requested architecture
 for ARCH in $req_arch; do
 	PACROOT="$WORKDIR/pacroot-$ARCH"
-	APKROOT="$PACROOT" # 1:1 compatibility for plugins referencing APKROOT
+	APKROOT="$PACROOT"
 	export PACROOT APKROOT
 
 	PACCONF="$WORKDIR/pacman-$ARCH.conf"
 	export PACCONF
 
 	if [ ! -e "$PACROOT" ]; then
-		# create root for caching pacman packages
 		mkdir -p "$PACROOT/var/cache/pacman/pkg" "$PACROOT/var/lib/pacman" "$PACROOT/etc/pacman.d/gnupg"
-		mkdir -p "$PACROOT/etc/apk/cache" "$PACROOT/etc/apk/keys" # compatibility paths
 
 		if [ -n "$_hostkeys" ] && [ -d /etc/pacman.d/gnupg ]; then
 			cp -a /etc/pacman.d/gnupg/* "$PACROOT/etc/pacman.d/gnupg/" 2>/dev/null || true
@@ -300,7 +309,7 @@ for ARCH in $req_arch; do
 			cp "$_packager_pubkey" "$PACROOT/etc/pacman.d/gnupg/" 2>/dev/null || true
 		fi
 
-		# Generate pacman.conf for this architecture
+		# Generate pacman.conf for this architecture with Krelpin repositories
 		cat > "$PACCONF" <<-EOF
 		[options]
 		Architecture = $ARCH
@@ -311,6 +320,12 @@ for ARCH in $req_arch; do
 		SigLevel = Never
 		LocalFileSigLevel = Optional
 
+		[krelpin]
+		SigLevel = Never
+
+		[main]
+		SigLevel = Never
+
 		EOF
 
 		if [ -n "$REPOS_FILE" ] && [ -f "$REPOS_FILE" ]; then
@@ -318,19 +333,14 @@ for ARCH in $req_arch; do
 		fi
 
 		if [ -n "$REPOS" ]; then
-			repo_num=1
 			echo "$REPOS" | while IFS= read -r repo_line; do
 				[ -n "$repo_line" ] || continue
 				if echo "$repo_line" | grep -q '^\['; then
 					echo "$repo_line" >> "$PACCONF"
 				else
 					cat >> "$PACCONF" <<-EOF
-					[kports_repo_${repo_num}]
 					Server = $repo_line
-					SigLevel = Never
-
 					EOF
-					repo_num=$((repo_num + 1))
 				fi
 			done
 		fi
@@ -345,7 +355,7 @@ for ARCH in $req_arch; do
 		done
 	fi
 
-	# Synchronize repositories
+	# Synchronize repositories if pacman available
 	if command -v pacman >/dev/null 2>&1; then
 		pacman --config "$PACCONF" -Sy 2>/dev/null || true
 	fi
@@ -358,4 +368,4 @@ for ARCH in $req_arch; do
 		(set -eo pipefail; build_profile)
 	done
 done
-echo "Images generated in $OUTDIR"
+echo "Krelpin images generated in $OUTDIR"

@@ -1,1 +1,0 @@
-genapkovl-dhcp.sh

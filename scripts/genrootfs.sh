@@ -8,13 +8,15 @@ tmp="$(mktemp -d)"
 trap cleanup EXIT
 chmod 0755 "$tmp"
 
-arch="$(pacman-conf Architecture 2>/dev/null || uname -m)"
+# Mobile first default architecture: aarch64
+arch="${ARCH:-aarch64}"
 repositories_file=""
 pacman_conf=""
 keys_dir=/etc/pacman.d/gnupg
 
 usage() {
 	echo "usage: $0 [-a arch] [-r repos_file] [-c pacman_conf] [-k keys_dir] [-o outfile] [package...]"
+	echo "Default architecture: aarch64 (mobile primary). Supports x86_64, armv7, riscv64."
 	exit 0
 }
 
@@ -32,17 +34,28 @@ done
 shift $(( OPTIND - 1 ))
 
 if [ -z "$outfile" ]; then
-	outfile="rootfs-$arch.tar.gz"
+	outfile="krelpin-rootfs-$arch.tar.gz"
 fi
 
 # Modern glibc pacman systems use merged usr
-mkdir -p "$tmp"/usr/lib "$tmp"/usr/bin "$tmp"/etc/pacman.d "$tmp"/var/lib/pacman "$tmp"/var/cache/pacman/pkg
+mkdir -p "$tmp"/usr/lib "$tmp"/usr/bin "$tmp"/usr/sbin "$tmp"/etc/pacman.d "$tmp"/var/lib/pacman "$tmp"/var/cache/pacman/pkg
 ln -sf usr/bin "$tmp"/bin
 ln -sf usr/bin "$tmp"/sbin
 ln -sf usr/lib "$tmp"/lib
 if [ "$arch" = "x86_64" ]; then
 	ln -sf usr/lib "$tmp"/lib64
 fi
+
+# Distro identification
+echo "Krelpin Linux ($arch)" > "$tmp"/etc/krelpin-release
+cat > "$tmp"/etc/os-release <<-EOF
+NAME="Krelpin Linux"
+PRETTY_NAME="Krelpin Linux ($arch)"
+ID=krelpin
+ID_LIKE=arch
+ANSI_COLOR="0;34"
+HOME_URL="https://krelpin.org"
+EOF
 
 # Prepare pacman configuration
 conf="$tmp/etc/pacman.conf"
@@ -53,6 +66,12 @@ elif [ -n "$repositories_file" ] && [ -f "$repositories_file" ]; then
 [options]
 Architecture = $arch
 CheckSpace
+SigLevel = Never
+
+[krelpin]
+SigLevel = Never
+
+[main]
 SigLevel = Never
 
 EOF
@@ -66,7 +85,11 @@ Architecture = $arch
 CheckSpace
 SigLevel = Never
 
-[core]
+[krelpin]
+SigLevel = Never
+Server = file:///var/cache/pacman/pkg
+
+[main]
 SigLevel = Never
 Server = file:///var/cache/pacman/pkg
 EOF
@@ -81,9 +104,13 @@ if [ -d "$keys_dir" ]; then
 	cp -a "$keys_dir"/* "$tmp/etc/pacman.d/gnupg/" 2>/dev/null || true
 fi
 
-# Default base packages if none specified
+# Default packages: Toolchains + Coreutils & Base System
 if [ $# -eq 0 ]; then
-	set -- base glibc pacman bash coreutils
+	set -- glibc gcc binutils linux-api-headers make patch pkgconf \
+		coreutils bash pacman pacman-mirrorlist krelpin-keyring \
+		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
+		file which curl util-linux iproute2 kmod shadow sudo e2fsprogs \
+		iw wpa_supplicant dhcpcd
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
@@ -92,7 +119,7 @@ if command -v pacstrap >/dev/null 2>&1; then
 elif command -v "$PACMAN_BIN" >/dev/null 2>&1; then
 	"$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -Sy "$@"
 else
-	echo "Neither pacstrap nor pacman found. Extracting packages if provided or initialize rootfs structure."
+	echo "Notice: Neither pacstrap nor pacman found on host. Skeleton rootfs created."
 fi
 
 rm -f "$tmp"/var/log/pacman.log
@@ -108,10 +135,11 @@ for bb in "$tmp"/bin/busybox "$tmp"/usr/bin/busybox; do
 	fi
 done
 
-# disable password login but allow login with ssh keys for root
+# Set root user configuration
 if [ -f "$tmp"/etc/shadow ]; then
 	sed -i -e 's/^root::/root:*:/' "$tmp"/etc/shadow
 	chgrp 42 "$tmp"/etc/shadow 2>/dev/null || true
 fi
 
 tar --numeric-owner --exclude='dev/*' -c -C "$tmp" . | gzip -9n > "$outfile"
+echo "Rootfs generated: $outfile"
