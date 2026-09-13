@@ -149,7 +149,7 @@ build_pkg() {
 	if [ -n "$existing_pkg" ] && [ "$REBUILD" != "yes" ]; then
 		msg "Package '$pkgname' already exists: $(basename "$existing_pkg") (skipping build, use -f to force)"
 		if [ -d "$CBUILDROOT" ]; then
-			fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --needed --overwrite '*' --nodeps "$existing_pkg" 2>/dev/null || true
+			fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --needed --overwrite '*' -dd "$existing_pkg" 2>/dev/null || true
 		fi
 		return 0
 	fi
@@ -163,11 +163,13 @@ build_pkg() {
 				[ -f "$pkgfile" ] || continue
 				case "$pkgfile" in *.sig) continue ;; esac
 				msg "Installing $pkgfile into $CBUILDROOT..."
-				fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --overwrite '*' --nodeps "$pkgfile" 2>/dev/null || true
+				fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --overwrite '*' -dd "$pkgfile" 2>/dev/null || true
 				# Also register into Krelpin binary repository
 				mkdir -p "$KPORTS/packages/$CTARGET_ARCH"
 				cp -f "$pkgfile" "$KPORTS/packages/$CTARGET_ARCH/"
 				repo-add "$KPORTS/packages/$CTARGET_ARCH/krelpin.db.tar.zst" "$KPORTS/packages/$CTARGET_ARCH/$pkgfile" 2>/dev/null || true
+				ln -sf "krelpin.db.tar.zst" "$KPORTS/packages/$CTARGET_ARCH/krelpin.db"
+				ln -sf "krelpin.files.tar.zst" "$KPORTS/packages/$CTARGET_ARCH/krelpin.files"
 			done
 		fi
 	)

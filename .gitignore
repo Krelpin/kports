@@ -8,6 +8,7 @@ main/*/*.zip
 main/*/*.sig
 main/*/*.pkg.tar.*
 main/glibc/glibc/
+main/gcc/gcc/
 
 # Built repository packages and databases
 packages/*/*.pkg.tar.*
