@@ -162,7 +162,6 @@ build_pkg() {
 			export CPPFLAGS="-I$CBUILDROOT/usr/include ${CPPFLAGS:-}"
 			export CXXFLAGS="-I$CBUILDROOT/usr/include ${CXXFLAGS:-}"
 			export LDFLAGS="-L$CBUILDROOT/usr/lib -Wl,-rpath-link,$CBUILDROOT/usr/lib ${LDFLAGS:-}"
-			export LD_LIBRARY_PATH="$CBUILDROOT/usr/lib:${LD_LIBRARY_PATH:-}"
 		fi
 		msg "Building $pkgname with makepkg..."
 		makepkg "$@"
