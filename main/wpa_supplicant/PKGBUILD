@@ -9,7 +9,7 @@ pkgrel=1
 epoch=2
 pkgdesc='A utility providing key negotiation for WPA wireless networks'
 url='https://w1.fi/wpa_supplicant/'
-arch=(x86_64)
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 license=(BSD-3-Clause)
 depends=(
   glibc

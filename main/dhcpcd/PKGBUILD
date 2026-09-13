@@ -9,7 +9,7 @@ pkgver=10.5.2
 pkgrel=1
 pkgdesc="DHCP/ IPv4LL/ IPv6RA/ DHCPv6 client"
 url="https://roy.marples.name/projects/dhcpcd/"
-arch=(x86_64)
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 license=(BSD-2-Clause)
 depends=(
   glibc

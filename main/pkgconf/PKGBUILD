@@ -10,7 +10,7 @@ pkgrel=1
 pkgdesc="Package compiler and linker metadata toolkit"
 url="https://github.com/pkgconf/pkgconf"
 license=(ISC)
-arch=(x86_64)
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 depends=(
   glibc
 )

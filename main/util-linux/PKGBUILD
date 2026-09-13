@@ -16,7 +16,7 @@ pkgver=2.42.3
 pkgrel=1
 pkgdesc='Miscellaneous system utilities for Linux'
 url='https://github.com/util-linux/util-linux'
-arch=('x86_64')
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 makedepends=('asciidoctor'
              'bash-completion'
              'git'

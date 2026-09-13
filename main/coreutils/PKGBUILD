@@ -8,7 +8,7 @@ pkgname=coreutils
 pkgver=9.11
 pkgrel=2
 pkgdesc='The basic file, shell and text manipulation utilities of the GNU operating system'
-arch=('x86_64')
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 license=(
   GPL-3.0-or-later
   GFDL-1.3-or-later
