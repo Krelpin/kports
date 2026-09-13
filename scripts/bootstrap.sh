@@ -16,7 +16,7 @@ if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
 	SUDO_PACMAN="sudo $SUDO_PACMAN"
 fi
 
-shift
+[ $# -gt 0 ] && shift
 
 # optional cross build packages
 #: ${KERNEL_PKG="linux-firmware linux"}

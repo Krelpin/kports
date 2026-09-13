@@ -13,13 +13,20 @@ repositories_file=""
 pacman_conf=""
 keys_dir=/etc/pacman.d/gnupg
 
-while getopts "a:r:c:k:o:" opt; do
+usage() {
+	echo "usage: $0 [-a arch] [-r repos_file] [-c pacman_conf] [-k keys_dir] [-o outfile] [package...]"
+	exit 0
+}
+
+while getopts "a:r:c:k:o:h" opt; do
 	case $opt in
 	a) arch="$OPTARG";;
 	r) repositories_file="$OPTARG";;
 	c) pacman_conf="$OPTARG";;
 	k) keys_dir="$OPTARG";;
 	o) outfile="$OPTARG";;
+	h) usage;;
+	*) usage;;
 	esac
 done
 shift $(( OPTIND - 1 ))
