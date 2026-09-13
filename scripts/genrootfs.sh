@@ -114,7 +114,7 @@ if command -v "$PACMAN_BIN" >/dev/null 2>&1; then
 
 	if [ -n "$available_pkgs" ]; then
 		echo "Installing base packages into Krelpin rootfs..."
-		$FAKEROOT "$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -S --needed --overwrite '*' $available_pkgs
+		$FAKEROOT "$PACMAN_BIN" --root "$tmp" --config "$conf" --arch "$arch" --noconfirm -S --needed --overwrite '*' -dd $available_pkgs
 	fi
 
 	# Ensure doas symlink exists if opendoas was installed
