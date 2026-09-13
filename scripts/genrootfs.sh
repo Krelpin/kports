@@ -88,7 +88,7 @@ if [ $# -eq 0 ]; then
 		coreutils bash pacman pacman-mirrorlist krelpin-keyring \
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
-		openrc dhcpcd iw wpa_supplicant
+		openrc dhcpcd libnl iw libcap
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
