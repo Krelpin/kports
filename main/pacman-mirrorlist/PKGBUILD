@@ -1,0 +1,17 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pacman-mirrorlist
+pkgver=20260913
+pkgrel=1
+pkgdesc="Krelpin Linux mirror list for pacman"
+arch=('any')
+url="https://krelpin.org"
+license=('GPL-3.0-or-later')
+backup=('etc/pacman.d/mirrorlist')
+source=('mirrorlist')
+sha256sums=('SKIP')
+
+package() {
+	install -dm755 "$pkgdir/etc/pacman.d"
+	install -m644 "$srcdir/mirrorlist" "$pkgdir/etc/pacman.d/mirrorlist"
+}

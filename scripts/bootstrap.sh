@@ -106,14 +106,14 @@ pkgbuildname() {
 	local repo="${1%%/*}"
 	local pkg="${1##*/}"
 	if [ "$repo" = "$1" ]; then
-		if [ -d "$KPORTS/core/$pkg" ]; then
-			repo="core"
-		elif [ -d "$KPORTS/main/$pkg" ]; then
+		if [ -d "$KPORTS/main/$pkg" ]; then
 			repo="main"
+		elif [ -d "$KPORTS/core/$pkg" ]; then
+			repo="core"
 		elif [ -d "$KPORTS/extra/$pkg" ]; then
 			repo="extra"
 		else
-			repo="core"
+			repo="main"
 		fi
 	fi
 	echo "$KPORTS/$repo/$pkg/PKGBUILD"

@@ -1,0 +1,9 @@
+##
+## Krelpin Linux repository mirrorlist
+##
+
+# Official Krelpin Primary Mirror
+Server = https://repo.krelpin.org/$repo/os/$arch
+
+# Local / Testing Mirror
+# Server = http://127.0.0.1:8080/krelpin/$repo/os/$arch

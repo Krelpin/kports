@@ -60,6 +60,7 @@ build_kernel() {
 }
 
 section_kernels() {
+	[ -n "$kernel_flavors" ] || return 0
 	local _f _pkgs
 	for _f in $kernel_flavors; do
 		_pkgs="linux-$_f linux-firmware"
@@ -306,7 +307,8 @@ profile_standard() {
 		*)   output_format="rootfs"; image_ext="tar.gz" ;;
 	esac
 
-	kernel_flavors="lts"
+	# Android-based mobile devices run Android/vendor kernel (boot.img), no desktop Linux kernel
+	kernel_flavors=""
 	initfs_cmdline="console=tty0 console=ttyAMA0,115200 quiet"
 	initfs_features="base ext4 mmc nvme squashfs usb virtio"
 

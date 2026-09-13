@@ -1,0 +1,18 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=krelpin-keyring
+pkgver=20260913
+pkgrel=1
+pkgdesc="Krelpin Linux PGP keyring for pacman"
+arch=('any')
+url="https://krelpin.org"
+license=('GPL-3.0-or-later')
+source=('krelpin.gpg' 'krelpin-trusted' 'krelpin-revoked')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+	install -dm755 "$pkgdir/usr/share/pacman/keyrings"
+	install -m644 "$srcdir/krelpin.gpg" "$pkgdir/usr/share/pacman/keyrings/"
+	install -m644 "$srcdir/krelpin-trusted" "$pkgdir/usr/share/pacman/keyrings/"
+	install -m644 "$srcdir/krelpin-revoked" "$pkgdir/usr/share/pacman/keyrings/"
+}

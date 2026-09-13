@@ -1,0 +1,21 @@
+pkgbase = fakeroot
+	pkgdesc = Tool for simulating superuser privileges
+	pkgver = 1.37.2
+	pkgrel = 3
+	epoch = 1
+	url = https://tracker.debian.org/pkg/fakeroot
+	arch = x86_64
+	license = GPL-3.0-or-later
+	checkdepends = sharutils
+	makedepends = git
+	makedepends = systemd
+	makedepends = po4a
+	depends = glibc
+	depends = filesystem
+	depends = sed
+	depends = util-linux
+	depends = sh
+	source = fakeroot-archive::git+https://github.com/eworm-de/fakeroot.git#tag=upstream/1.37.2-2026-01-17-8d7bc2eb
+	sha256sums = 46f44681cc939dd3f127761717830c0bfa72e1568191d4df071ae297013591e3
+
+pkgname = fakeroot
