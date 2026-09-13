@@ -157,15 +157,12 @@ build_pkg() {
 	(
 		cd "$pkgdir"
 		if [ -d "$CBUILDROOT" ]; then
-			export PKG_CONFIG_SYSROOT_DIR="$CBUILDROOT"
 			export PKG_CONFIG_PATH="$CBUILDROOT/usr/lib/pkgconfig:$CBUILDROOT/usr/share/pkgconfig:${PKG_CONFIG_PATH:-}"
 			export CFLAGS="-I$CBUILDROOT/usr/include ${CFLAGS:-}"
 			export CPPFLAGS="-I$CBUILDROOT/usr/include ${CPPFLAGS:-}"
 			export CXXFLAGS="-I$CBUILDROOT/usr/include ${CXXFLAGS:-}"
 			export LDFLAGS="-L$CBUILDROOT/usr/lib -Wl,-rpath-link,$CBUILDROOT/usr/lib ${LDFLAGS:-}"
-			if [ -x "$CBUILDROOT/usr/bin/gcc" ]; then
-				export PATH="$CBUILDROOT/usr/bin:$PATH"
-			fi
+			export LD_LIBRARY_PATH="$CBUILDROOT/usr/lib:${LD_LIBRARY_PATH:-}"
 		fi
 		msg "Building $pkgname with makepkg..."
 		makepkg "$@"
@@ -175,6 +172,7 @@ build_pkg() {
 				case "$pkgfile" in *.sig) continue ;; esac
 				msg "Installing $pkgfile into $CBUILDROOT..."
 				fakeroot pacman --config "$CBUILDROOT/etc/pacman.conf" -U --noconfirm --root "$CBUILDROOT" --overwrite '*' -dd "$pkgfile" 2>/dev/null || true
+				sed -i 's|/usr/lib/||g' "$CBUILDROOT"/usr/lib/libc.so "$CBUILDROOT"/usr/lib/libm.so 2>/dev/null || true
 				# Also register into Krelpin binary repository
 				mkdir -p "$KPORTS/packages/$CTARGET_ARCH"
 				cp -f "$pkgfile" "$KPORTS/packages/$CTARGET_ARCH/"
