@@ -27,6 +27,7 @@ build() {
     --bindir=/usr/bin \
     --libdir=/usr/lib \
     --sysconfdir=/etc \
+    --disable-logind \
     --without-libpam \
     --without-audit \
     --without-selinux \
