@@ -277,6 +277,11 @@ for pkg in "${TARGET_PKGS[@]}"; do
 
 		echo ">>> Registering $pkgfile in $REPO_NAME database..."
 		repo-add "$REPO_DIR/${REPO_NAME}.db.tar.zst" "$REPO_DIR/$pkgfile"
+
+		if [ -d "$SYSROOT" ] && [ -f "$SYSROOT/etc/pacman.conf" ]; then
+			echo ">>> Installing $pkgfile into sysroot ($SYSROOT)..."
+			fakeroot pacman --config "$SYSROOT/etc/pacman.conf" -U --noconfirm --root "$SYSROOT" --overwrite '*' -dd "$REPO_DIR/$pkgfile" 2>/dev/null || true
+		fi
 	done
 
 	# Clean build artifacts if requested
