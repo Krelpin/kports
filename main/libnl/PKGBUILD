@@ -10,7 +10,7 @@ license=('LGPL-2.1-only')
 depends=('glibc')
 provides=('libnl-3.so' 'libnl-genl-3.so' 'libnl-route-3.so')
 backup=('etc/libnl/classid' 'etc/libnl/pktloc')
-source=("https://github.com/thom311/libnl/releases/download/libnl3_${pkgver//./_}/libnl-${pkgver}.tar.gz")
+source=("https://github.com/thom311/libnl/releases/download/libnl${pkgver//./_}/libnl-${pkgver}.tar.gz")
 sha256sums=('2a56e1edefa3e68a7c00879496736fdbf62fc94ed3232c0baba127ecfa76874d')
 
 build() {
