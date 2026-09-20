@@ -25,6 +25,7 @@ build() {
     --without-cxx \
     --without-cxx-binding \
     --with-termlib \
+    --with-versioned-syms \
     --enable-widec \
     --enable-pc-files \
     --with-pkg-config-libdir=/usr/lib/pkgconfig
