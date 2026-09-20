@@ -89,7 +89,8 @@ if [ $# -eq 0 ]; then
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
 		openrc halium-overlay dhcpcd libnl iw libcap procps-ng inetutils kbd \
-		ncurses readline openssl expat dbus pcsclite wpa_supplicant tzdata
+		ncurses readline openssl expat dbus pcsclite wpa_supplicant tzdata \
+		gcc-libs zlib libxcrypt libarchive
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
@@ -133,6 +134,21 @@ if command -v "$PACMAN_BIN" >/dev/null 2>&1; then
 	ID_LIKE=arch
 	ANSI_COLOR="0;34"
 	HOME_URL="https://krelpin.org"
+	EOF
+
+	# The pacman.conf used above points at the build-time temporary directory.
+	# Replace it with one that works inside the image, otherwise pacman fails
+	# with "failed to resolve path ... passed to 'DBPath'".
+	cat > "$tmp/etc/pacman.conf" <<-EOF
+	[options]
+	Architecture = $arch
+	HoldPkg = pacman glibc
+	CheckSpace
+	SigLevel = Required DatabaseOptional
+	LocalFileSigLevel = Optional
+
+	[krelpin]
+	Include = /etc/pacman.d/mirrorlist
 	EOF
 
 	# Ensure merged-usr symlinks if needed

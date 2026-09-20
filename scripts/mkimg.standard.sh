@@ -101,12 +101,13 @@ profile_standard() {
 
 	# Package list: Main repo package selection
 	# 1. Base Toolchain
-	local _toolchain="filesystem glibc gcc binutils linux-api-headers make patch pkgconf fakeroot"
+	local _toolchain="filesystem glibc gcc gcc-libs binutils linux-api-headers make patch pkgconf fakeroot"
 
 	# 2. Core Utilities & System Base
 	local _coreutils="coreutils bash pacman pacman-mirrorlist krelpin-keyring
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils
-		file which curl util-linux iproute2 kmod shadow doas e2fsprogs"
+		file which curl util-linux iproute2 kmod shadow doas e2fsprogs
+		zlib libxcrypt libarchive"
 
 	# 3. Mobile Hardware, OpenRC Init & Networking
 	local _mobile="openrc halium-overlay dhcpcd iw wpa_supplicant tzdata procps-ng inetutils kbd"
