@@ -1,0 +1,31 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=tzdata
+pkgver=2026d
+pkgrel=1
+pkgdesc='Sources for time zone and daylight saving time data'
+arch=('any')
+url='https://www.iana.org/time-zones'
+license=('LicenseRef-public-domain')
+source=("https://data.iana.org/time-zones/releases/${pkgname}${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+_zones=(africa antarctica asia australasia europe northamerica southamerica
+        etcetera backward factory)
+
+package() {
+  cd "${srcdir}"
+
+  # zic comes from the build host; tzdata ships data only, no code.
+  install -dm755 "${pkgdir}/usr/share/zoneinfo"
+  zic -b fat -d "${pkgdir}/usr/share/zoneinfo" "${_zones[@]}"
+  zic -b fat -d "${pkgdir}/usr/share/zoneinfo/posix" "${_zones[@]}"
+  zic -b fat -d "${pkgdir}/usr/share/zoneinfo/right" -L leapseconds "${_zones[@]}"
+
+  install -m644 zone.tab zone1970.tab iso3166.tab leapseconds leap-seconds.list \
+    "${pkgdir}/usr/share/zoneinfo/"
+
+  # Default to UTC until a device or the user picks a zone.
+  install -dm755 "${pkgdir}/etc"
+  ln -s ../usr/share/zoneinfo/UTC "${pkgdir}/etc/localtime"
+}
