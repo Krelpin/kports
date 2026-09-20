@@ -89,7 +89,7 @@ if [ $# -eq 0 ]; then
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
 		openrc halium-overlay dhcpcd libnl iw libcap procps-ng inetutils kbd \
-		ncurses readline openssl expat dbus pcsclite wpa_supplicant
+		ncurses readline openssl expat dbus pcsclite wpa_supplicant tzdata
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"
