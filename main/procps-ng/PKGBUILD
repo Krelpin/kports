@@ -1,0 +1,37 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=procps-ng
+pkgver=4.0.5
+pkgrel=1
+pkgdesc='Utilities for monitoring your system and its processes'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.com/procps-ng/procps'
+license=('GPL-2.0-or-later' 'LGPL-2.1-or-later')
+depends=('glibc' 'ncurses')
+provides=('libproc2.so' 'procps')
+source=("https://downloads.sourceforge.net/project/procps-ng/Production/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  # src/watch.c uses true/false without including stdbool.h, which only
+  # compiled while some other header happened to pull it in.
+  export CFLAGS="${CFLAGS} -include stdbool.h"
+
+  ./configure \
+    --prefix=/usr \
+    --bindir=/usr/bin \
+    --sbindir=/usr/bin \
+    --libdir=/usr/lib \
+    --sysconfdir=/etc \
+    --disable-static \
+    --disable-kill \
+    --disable-modern-top
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
