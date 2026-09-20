@@ -109,7 +109,7 @@ profile_standard() {
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs"
 
 	# 3. Mobile Hardware, OpenRC Init & Networking
-	local _mobile="openrc dhcpcd iw wpa_supplicant tzdata procps-ng inetutils kbd"
+	local _mobile="openrc halium-overlay dhcpcd iw wpa_supplicant tzdata procps-ng inetutils kbd"
 
 	pkgs="$_toolchain $_coreutils $_mobile"
 	apks="$pkgs"
