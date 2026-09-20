@@ -101,7 +101,7 @@ profile_standard() {
 
 	# Package list: Main repo package selection
 	# 1. Base Toolchain
-	local _toolchain="glibc gcc binutils linux-api-headers make patch pkgconf fakeroot"
+	local _toolchain="filesystem glibc gcc binutils linux-api-headers make patch pkgconf fakeroot"
 
 	# 2. Core Utilities & System Base
 	local _coreutils="coreutils bash pacman pacman-mirrorlist krelpin-keyring
@@ -109,7 +109,7 @@ profile_standard() {
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs"
 
 	# 3. Mobile Hardware, OpenRC Init & Networking
-	local _mobile="openrc dhcpcd iw wpa_supplicant tzdata"
+	local _mobile="openrc dhcpcd iw wpa_supplicant tzdata procps-ng inetutils kbd"
 
 	pkgs="$_toolchain $_coreutils $_mobile"
 	apks="$pkgs"

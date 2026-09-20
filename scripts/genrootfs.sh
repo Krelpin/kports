@@ -84,11 +84,11 @@ fi
 
 # Default packages: Toolchains + Coreutils & Base System + OpenRC & Networking
 if [ $# -eq 0 ]; then
-	set -- glibc gcc binutils linux-api-headers make patch pkgconf \
+	set -- filesystem glibc gcc binutils linux-api-headers make patch pkgconf \
 		coreutils bash pacman pacman-mirrorlist krelpin-keyring \
 		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
 		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
-		openrc dhcpcd libnl iw libcap \
+		openrc dhcpcd libnl iw libcap procps-ng inetutils kbd \
 		ncurses readline openssl expat dbus pcsclite wpa_supplicant
 fi
 
