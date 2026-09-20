@@ -36,4 +36,8 @@ package() {
   cd "${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
   install -Dm644 COPYING "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+
+  # The pid directory is created at runtime under /run, and shipping
+  # /var/run collides with the symlink the filesystem package owns.
+  rm -rf "${pkgdir}/var/run"
 }
