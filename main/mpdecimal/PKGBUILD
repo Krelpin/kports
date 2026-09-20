@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=mpdecimal
+pkgver=4.0.1
+pkgrel=1
+pkgdesc='Package for correctly-rounded arbitrary precision decimal floating point arithmetic'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.bytereef.org/mpdecimal/index.html'
+license=('BSD-2-Clause')
+depends=('glibc' 'gcc-libs')
+source=("https://www.bytereef.org/software/${pkgname}/releases/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib
+  LDXXFLAGS="$LDFLAGS" make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 COPYRIGHT.txt -t "${pkgdir}/usr/share/licenses/${pkgname}/"
+}

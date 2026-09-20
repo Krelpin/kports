@@ -1,0 +1,38 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=sqlite
+pkgver=3.49.1
+_srcver=3490100
+pkgrel=1
+pkgdesc='Small, fast, self-contained SQL database engine'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.sqlite.org/'
+license=('blessing')
+depends=('glibc' 'zlib' 'readline' 'ncurses')
+provides=('libsqlite3.so')
+source=("https://www.sqlite.org/2025/sqlite-autoconf-${_srcver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "sqlite-autoconf-${_srcver}"
+  local _sysroot="${SYSROOT:-$(cd "${srcdir}/../../.." && pwd)/sysroot-${CARCH:-aarch64}}"
+
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --disable-static \
+    --enable-readline \
+    --with-readline-cflags="-I${_sysroot}/usr/include" \
+    --with-readline-ldflags="-L${_sysroot}/usr/lib -lreadline -lncursesw" \
+    --enable-session \
+    --enable-fts3 \
+    --enable-fts4 \
+    --enable-fts5 \
+    --enable-rtree
+  make
+}
+
+package() {
+  cd "sqlite-autoconf-${_srcver}"
+  make DESTDIR="${pkgdir}" install
+}
