@@ -1,0 +1,31 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libxcrypt
+pkgver=4.4.38
+pkgrel=1
+pkgdesc='Modern library for one-way hashing of passwords'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/besser82/libxcrypt'
+license=('LGPL-2.1-or-later')
+depends=('glibc')
+provides=('libcrypt.so')
+source=("https://github.com/besser82/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  # glibc dropped libcrypt; shadow and doas are linked against libcrypt.so.1,
+  # so build the compatible ABI rather than the libcrypt.so.2 one.
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --disable-static \
+    --disable-werror \
+    --enable-obsolete-api
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
