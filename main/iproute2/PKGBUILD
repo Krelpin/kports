@@ -30,9 +30,7 @@ build() {
 
   ./configure --color auto
 
-  # configure links libelf whenever the build host happens to have it, but
-  # elfutils is not part of the rootfs, which leaves ip unable to start.
-  # It is only needed for loading BPF object files.
+  # TODO: link libelf once elfutils is ported
   sed -i '/^HAVE_ELF:=/d;/-DHAVE_ELF/d;/lelf/d' config.mk
   echo 'HAVE_ELF:=n' >> config.mk
 

@@ -12,7 +12,6 @@ source=('group' 'gshadow' 'passwd' 'shadow' 'fstab' 'hosts' 'issue')
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 
 package() {
-  # Usrmerge layout: /bin, /sbin and /lib are symlinks into /usr.
   install -dm755 "${pkgdir}/usr/"{bin,lib,include,share,src}
   ln -s usr/bin "${pkgdir}/bin"
   ln -s usr/bin "${pkgdir}/sbin"
@@ -30,14 +29,10 @@ package() {
 
   install -dm755 "${pkgdir}/etc/"{conf.d,init.d,runlevels,profile.d,modprobe.d,sysctl.d}
 
-  # A port overlay replaces this directory wholesale, so it has to exist.
   install -dm755 "${pkgdir}/usr/lib/modules"
 
-  # An overlay can only bind-mount onto paths that already exist, so the
-  # directory a port drops its device metadata into is created here.
   install -dm755 "${pkgdir}/etc/deviceinfo/devices"
 
-  # Accounts. shadow and gshadow stay readable by root only.
   install -m644 "${srcdir}/group"    "${pkgdir}/etc/group"
   install -m644 "${srcdir}/passwd"   "${pkgdir}/etc/passwd"
   install -m600 "${srcdir}/shadow"   "${pkgdir}/etc/shadow"

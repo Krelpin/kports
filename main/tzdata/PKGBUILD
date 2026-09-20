@@ -16,7 +16,6 @@ _zones=(africa antarctica asia australasia europe northamerica southamerica
 package() {
   cd "${srcdir}"
 
-  # zic comes from the build host; tzdata ships data only, no code.
   install -dm755 "${pkgdir}/usr/share/zoneinfo"
   zic -b fat -d "${pkgdir}/usr/share/zoneinfo" "${_zones[@]}"
   zic -b fat -d "${pkgdir}/usr/share/zoneinfo/posix" "${_zones[@]}"
@@ -25,7 +24,6 @@ package() {
   install -m644 zone.tab zone1970.tab iso3166.tab leapseconds leap-seconds.list \
     "${pkgdir}/usr/share/zoneinfo/"
 
-  # Default to UTC until a device or the user picks a zone.
   install -dm755 "${pkgdir}/etc"
   ln -s ../usr/share/zoneinfo/UTC "${pkgdir}/etc/localtime"
 }

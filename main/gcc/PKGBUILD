@@ -117,9 +117,7 @@ package_gcc() {
   install -Dm755 "$srcdir"/c89 "$pkgdir"/usr/bin/c89
   install -Dm755 "$srcdir"/c99 "$pkgdir"/usr/bin/c99
 
-  # Prepare internal runtime libraries directory for gcc-libs.
-  # GCC installs these into /usr/lib64 on this target, which is not on the
-  # linker path, so collect from both locations and ship them in /usr/lib.
+  # GCC installs these into /usr/lib64, which is not on the linker path
   rm -rf "$srcdir"/gcc-libs-pkg
   install -dm755 "$srcdir"/gcc-libs-pkg/usr/lib
   for _lib in "$pkgdir"/usr/lib{,64}/lib{gcc_s,stdc++,atomic,gomp}.so*; do

@@ -14,8 +14,6 @@ sha256sums=('SKIP')
 
 build() {
   cd "${pkgname}-${pkgver}"
-  # glibc dropped libcrypt; shadow and doas are linked against libcrypt.so.1,
-  # so build the compatible ABI rather than the libcrypt.so.2 one.
   ./configure \
     --prefix=/usr \
     --libdir=/usr/lib \

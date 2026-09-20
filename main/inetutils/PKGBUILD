@@ -13,7 +13,6 @@ sha256sums=('SKIP')
 
 build() {
   cd "${pkgname}-${pkgver}"
-  # Only the local utilities are wanted, the network daemons are not.
   ./configure \
     --prefix=/usr \
     --bindir=/usr/bin \

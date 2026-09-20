@@ -61,8 +61,6 @@ check() {
 package() {
     meson install -C build --destdir "$pkgdir"
 
-    # Boot loaders and initramfs hand off to /sbin/init; /sbin is a symlink
-    # to usr/bin, so openrc-init has to be reachable under that name.
     ln -s openrc-init "$pkgdir/usr/bin/init"
 
     # install default inittab

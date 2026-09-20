@@ -20,8 +20,6 @@ sha256sums=('66ac7c0e725278eb2b039e3104f2c91119341d941b41bac7a285c695f940bd57')
 build() {
   cd "${pkgname}-${pkgver}"
 
-  # util-linux' configure overrides the autoconf defaults with /bin and /lib
-  # unless --bindir and --libdir are passed, which breaks the usrmerge layout.
   ./configure \
     --prefix=/usr \
     --sysconfdir=/etc \

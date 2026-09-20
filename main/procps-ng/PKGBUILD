@@ -15,8 +15,6 @@ sha256sums=('SKIP')
 build() {
   cd "${pkgname}-${pkgver}"
 
-  # src/watch.c uses true/false without including stdbool.h, which only
-  # compiled while some other header happened to pull it in.
   export CFLAGS="${CFLAGS} -include stdbool.h"
 
   ./configure \
