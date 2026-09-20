@@ -1,0 +1,42 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=filesystem
+pkgver=20260920
+pkgrel=1
+pkgdesc='Base Krelpin Linux files and directory layout'
+arch=('any')
+url='https://krelpin.org'
+license=('GPL-3.0-or-later')
+groups=('base')
+source=('group' 'gshadow' 'passwd' 'shadow' 'fstab' 'hosts' 'issue')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+  # Usrmerge layout: /bin, /sbin and /lib are symlinks into /usr.
+  install -dm755 "${pkgdir}/usr/"{bin,lib,include,share,src}
+  ln -s usr/bin "${pkgdir}/bin"
+  ln -s usr/bin "${pkgdir}/sbin"
+  ln -s usr/lib "${pkgdir}/lib"
+
+  install -dm755 "${pkgdir}/"{boot,dev,etc,home,mnt,opt,srv}
+  install -dm555 "${pkgdir}/"{proc,sys}
+  install -dm750 "${pkgdir}/root"
+  install -dm1777 "${pkgdir}/tmp"
+  install -dm755 "${pkgdir}/run"
+  install -dm755 "${pkgdir}/var/"{cache,lib,local,log,opt,spool}
+  install -dm1777 "${pkgdir}/var/tmp"
+  ln -s ../run "${pkgdir}/var/run"
+  ln -s ../run/lock "${pkgdir}/var/lock"
+
+  install -dm755 "${pkgdir}/etc/"{conf.d,init.d,runlevels,profile.d,modprobe.d,sysctl.d}
+
+  # Accounts. shadow and gshadow stay readable by root only.
+  install -m644 "${srcdir}/group"    "${pkgdir}/etc/group"
+  install -m644 "${srcdir}/passwd"   "${pkgdir}/etc/passwd"
+  install -m600 "${srcdir}/shadow"   "${pkgdir}/etc/shadow"
+  install -m600 "${srcdir}/gshadow"  "${pkgdir}/etc/gshadow"
+
+  install -m644 "${srcdir}/fstab"      "${pkgdir}/etc/fstab"
+  install -m644 "${srcdir}/hosts"      "${pkgdir}/etc/hosts"
+  install -m644 "${srcdir}/issue"      "${pkgdir}/etc/issue"
+}
