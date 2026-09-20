@@ -10,7 +10,7 @@ pkgdesc='IP Routing Utilities'
 arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
 license=('GPL-2.0-or-later')
 url='https://git.kernel.org/pub/scm/network/iproute2/iproute2.git'
-depends=('glibc')
+depends=('glibc' 'libcap')
 provides=('iproute')
 options=('!emptydirs')
 source=("https://kernel.org/pub/linux/utils/net/iproute2/iproute2-${pkgver}.tar.xz"
@@ -29,6 +29,13 @@ build() {
   cd "${pkgname}-${pkgver}"
 
   ./configure --color auto
+
+  # configure links libelf whenever the build host happens to have it, but
+  # elfutils is not part of the rootfs, which leaves ip unable to start.
+  # It is only needed for loading BPF object files.
+  sed -i '/^HAVE_ELF:=/d;/-DHAVE_ELF/d;/lelf/d' config.mk
+  echo 'HAVE_ELF:=n' >> config.mk
+
   make
 }
 
