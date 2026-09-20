@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=python-setuptools
+_name=${pkgname#python-}
+pkgver=75.8.0
+pkgrel=1
+pkgdesc='Easily download, build, install, upgrade, and uninstall Python packages'
+arch=('any')
+url='https://pypi.org/project/setuptools/'
+license=('MIT')
+# TODO: switch to the full Arch dependency set and a PEP 517 build once
+# python-build, python-installer, packaging and wheel are ported
+depends=('python')
+source=("https://pypi.io/packages/py3/${_name::1}/${_name}/${_name}-${pkgver}-py3-none-any.whl")
+noextract=("${_name}-${pkgver}-py3-none-any.whl")
+sha256sums=('SKIP')
+
+package() {
+  local _site="${pkgdir}/usr/lib/python3.12/site-packages"
+  install -dm755 "${_site}"
+  bsdtar -xf "${srcdir}/${_name}-${pkgver}-py3-none-any.whl" -C "${_site}"
+  install -Dm644 "${_site}/${_name}-${pkgver}.dist-info/LICENSE" \
+    -t "${pkgdir}/usr/share/licenses/${pkgname}/" 2>/dev/null || true
+}

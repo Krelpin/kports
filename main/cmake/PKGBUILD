@@ -1,0 +1,41 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=cmake
+pkgver=3.31.6
+pkgrel=1
+pkgdesc='Cross-platform build system generator'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://cmake.org/'
+license=('BSD-3-Clause')
+depends=('glibc' 'gcc-libs' 'curl' 'expat' 'zlib' 'zstd' 'bzip2' 'xz' 'libarchive' 'ncurses' 'openssl')
+source=("https://github.com/Kitware/CMake/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+
+  ./bootstrap \
+    --prefix=/usr \
+    --datadir=/share/cmake \
+    --docdir=/share/doc/cmake \
+    --mandir=/share/man \
+    --system-curl \
+    --system-expat \
+    --system-zlib \
+    --system-bzip2 \
+    --system-liblzma \
+    --system-zstd \
+    --system-libarchive \
+    --no-system-jsoncpp \
+    --no-system-librhash \
+    --no-system-cppdap \
+    --parallel="$(nproc)" \
+    -- -DCMAKE_PREFIX_PATH="${SYSROOT}/usr" \
+       -DCMAKE_FIND_ROOT_PATH="${SYSROOT}"
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
