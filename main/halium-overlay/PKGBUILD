@@ -1,0 +1,21 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=halium-overlay
+pkgver=1
+pkgrel=1
+pkgdesc='Applies a device port overlay over the root filesystem at boot'
+arch=('any')
+url='https://krelpin.org'
+license=('GPL-3.0-or-later')
+depends=('openrc' 'util-linux')
+source=('mount-halium-overlay' 'halium-overlay.initd')
+sha256sums=('SKIP' 'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/mount-halium-overlay" \
+    "${pkgdir}/usr/libexec/halium-overlay/mount-halium-overlay"
+  install -Dm755 "${srcdir}/halium-overlay.initd" \
+    "${pkgdir}/etc/init.d/halium-overlay"
+  install -dm755 "${pkgdir}/etc/runlevels/sysinit"
+  ln -s /etc/init.d/halium-overlay "${pkgdir}/etc/runlevels/sysinit/halium-overlay"
+}

@@ -1,0 +1,86 @@
+#!/bin/sh -eu
+
+# Bind-mount a Halium overlay over the running root filesystem.
+#
+# Ported from UBports' lxc-android-config, which does the same thing from a
+# systemd unit. The Android-container specific parts are left out: Krelpin has
+# no /android mount, so only the overlay itself is applied.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+log() {
+    echo "$*" >&2
+}
+
+overlay_source=''
+for d in \
+    /opt/halium-overlay \
+    /usr/share/halium-overlay \
+; do
+    if [ -d "$d" ]; then
+        overlay_source="$d"
+        break
+    fi
+done
+
+if [ -z "$overlay_source" ]; then
+    log "No Halium overlay present, nothing to do."
+    exit 0
+fi
+
+mount_bind_safe() {
+    if mountpoint -q "$2"; then
+        log "WARNING: $2 is already a mountpoint."
+        return
+    fi
+
+    mount --bind "$1" "$2"
+}
+
+overlay_dir() {
+    # These must stay local, the function recurses into itself.
+    local src=$1
+    local target=$2
+    local srcfile
+    local targetfile
+    local filename
+
+    for srcfile in "$src"/*; do
+        # Protect against null match
+        if ! [ -e "$srcfile" ]; then break; fi
+
+        filename="$(basename "$srcfile")"
+        targetfile="${target}/${filename}"
+
+        if [ -d "$srcfile" ]; then
+            if ! [ -d "$targetfile" ]; then
+                log "WARNING: $targetfile is not a directory, cannot overlay directory source."
+                continue
+            fi
+
+            if [ -e "$srcfile"/.halium-override-dir ]; then
+                # Replace the whole directory.
+                mount_bind_safe "$srcfile" "$targetfile"
+            elif [ -e "$srcfile"/.halium-overlay-dir ]; then
+                # Merge the directory. Lower layers stack right to left, so the
+                # overlay wins over what is already there.
+                mount -t overlay -o "lowerdir=${srcfile}:${targetfile}" \
+                    "halium-overlay-${filename}" "${targetfile}"
+            else
+                overlay_dir "$srcfile" "$targetfile"
+            fi
+        else
+            if [ -d "$targetfile" ]; then
+                log "WARNING: $targetfile is a directory, cannot overlay file source."
+                continue
+            elif ! [ -e "$targetfile" ]; then
+                log "WARNING: $targetfile doesn't exist, cannot overlay."
+                continue
+            fi
+
+            mount_bind_safe "$srcfile" "$targetfile"
+        fi
+    done
+}
+
+overlay_dir "$overlay_source" /

@@ -1,0 +1,17 @@
+#!/sbin/openrc-run
+
+description="Bind-mount the Halium overlay over the root filesystem"
+
+depend() {
+	# devfs provides dev-mount; the dev service itself comes from udev, which
+	# a port is not required to install.
+	need dev-mount
+	before modules localmount
+	keyword -containers -vserver
+}
+
+start() {
+	ebegin "Mounting Halium overlay"
+	/usr/libexec/halium-overlay/mount-halium-overlay
+	eend $?
+}
