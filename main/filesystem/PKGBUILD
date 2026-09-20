@@ -30,6 +30,9 @@ package() {
 
   install -dm755 "${pkgdir}/etc/"{conf.d,init.d,runlevels,profile.d,modprobe.d,sysctl.d}
 
+  # A port overlay replaces this directory wholesale, so it has to exist.
+  install -dm755 "${pkgdir}/usr/lib/modules"
+
   # Accounts. shadow and gshadow stay readable by root only.
   install -m644 "${srcdir}/group"    "${pkgdir}/etc/group"
   install -m644 "${srcdir}/passwd"   "${pkgdir}/etc/passwd"
