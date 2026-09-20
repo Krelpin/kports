@@ -1,0 +1,28 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libdrm
+pkgver=2.4.124
+pkgrel=1
+pkgdesc='Userspace interface to kernel DRM services'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://dri.freedesktop.org/'
+license=('MIT')
+depends=('glibc' 'libpciaccess')
+makedepends=('meson' 'ninja')
+provides=('libdrm.so')
+source=("https://dri.freedesktop.org/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Dudev=true \
+    -Dvalgrind=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

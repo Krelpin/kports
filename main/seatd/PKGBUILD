@@ -1,0 +1,29 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=seatd
+pkgver=0.9.1
+pkgrel=1
+pkgdesc='Minimal seat management daemon and universal library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://git.sr.ht/~kennylevinsen/seatd'
+license=('MIT')
+depends=('glibc')
+makedepends=('meson' 'ninja')
+provides=('libseat.so')
+source=("https://git.sr.ht/~kennylevinsen/seatd/archive/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Dlibseat-logind=disabled \
+    -Dserver=enabled \
+    -Dexamples=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

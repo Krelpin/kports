@@ -1,0 +1,28 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libevdev
+pkgver=1.13.3
+pkgrel=1
+pkgdesc='Wrapper library for evdev devices'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.freedesktop.org/wiki/Software/libevdev/'
+license=('MIT')
+depends=('glibc')
+makedepends=('meson' 'ninja' 'python')
+provides=('libevdev.so')
+source=("https://www.freedesktop.org/software/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Ddocumentation=disabled \
+    -Dtests=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

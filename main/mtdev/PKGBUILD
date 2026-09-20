@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=mtdev
+pkgver=1.1.7
+pkgrel=1
+pkgdesc='Multitouch Protocol Translation Library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://bitmath.org/code/mtdev/'
+license=('MIT')
+depends=('glibc')
+provides=('libmtdev.so')
+source=("https://bitmath.org/code/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

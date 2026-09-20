@@ -1,0 +1,31 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libinput
+pkgver=1.27.1
+pkgrel=1
+pkgdesc='Input device management and event handling library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.freedesktop.org/wiki/Software/libinput/'
+license=('MIT')
+# TODO: add libwacom once ported
+depends=('glibc' 'mtdev' 'libevdev' 'eudev')
+makedepends=('meson' 'ninja' 'python')
+provides=('libinput.so')
+source=("https://gitlab.freedesktop.org/${pkgname}/${pkgname}/-/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Ddebug-gui=false \
+    -Dtests=false \
+    -Ddocumentation=false \
+    -Dlibwacom=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

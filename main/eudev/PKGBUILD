@@ -1,0 +1,35 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=eudev
+pkgver=3.2.14
+pkgrel=1
+pkgdesc='Userspace device manager, forked from systemd-udev'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/eudev-project/eudev'
+license=('GPL-2.0-or-later')
+depends=('glibc' 'util-linux' 'kmod')
+provides=('libudev.so' 'udev')
+source=("https://github.com/eudev-project/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --sysconfdir=/etc \
+    --sbindir=/usr/bin \
+    --with-rootprefix=/usr \
+    --with-rootlibdir=/usr/lib \
+    --enable-manpages \
+    --enable-hwdb \
+    --enable-blkid \
+    --enable-kmod \
+    --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

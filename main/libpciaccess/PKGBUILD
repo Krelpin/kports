@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libpciaccess
+pkgver=0.18.1
+pkgrel=1
+pkgdesc='X11 library for generic PCI access'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://xorg.freedesktop.org/'
+license=('MIT')
+depends=('glibc')
+makedepends=('meson')
+source=("https://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}
