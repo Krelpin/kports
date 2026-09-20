@@ -15,6 +15,7 @@ depends=(
   glibc
   libdbus
   libnl
+  ncurses
   openssl
   pcsclite
   readline

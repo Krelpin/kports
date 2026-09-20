@@ -10,6 +10,7 @@ url='https://curl.se/'
 license=('curl')
 depends=(
   'glibc'
+  'openssl'
   'zstd'
 )
 provides=('libcurl.so')
