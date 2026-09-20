@@ -124,6 +124,9 @@ if [ -z "$SYSROOT" ]; then
 	SYSROOT="$kports_root/sysroot-$ARCH"
 fi
 
+# PKGBUILDs need this to run binaries built against the sysroot
+export SYSROOT
+
 # Toolchain isolation verification
 if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	if [ ! -d "$SYSROOT" ] || [ ! -x "$SYSROOT/usr/bin/gcc" ]; then

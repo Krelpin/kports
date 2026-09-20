@@ -23,11 +23,9 @@ prepare() {
 build() {
   cd "Python-${pkgver}"
 
-  local _sysroot="${SYSROOT:-$(cd "${srcdir}/../../.." && pwd)/sysroot-${CARCH:-aarch64}}"
-
   # RUNSHARED is baked in at configure time and used to run the new
   # interpreter, so the sysroot has to be visible here too
-  export LD_LIBRARY_PATH="${_sysroot}/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  export LD_LIBRARY_PATH="${SYSROOT}/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
   ./configure \
     --prefix=/usr \

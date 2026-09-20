@@ -15,15 +15,13 @@ sha256sums=('SKIP')
 
 build() {
   cd "sqlite-autoconf-${_srcver}"
-  local _sysroot="${SYSROOT:-$(cd "${srcdir}/../../.." && pwd)/sysroot-${CARCH:-aarch64}}"
-
   ./configure \
     --prefix=/usr \
     --libdir=/usr/lib \
     --disable-static \
     --enable-readline \
-    --with-readline-cflags="-I${_sysroot}/usr/include" \
-    --with-readline-ldflags="-L${_sysroot}/usr/lib -lreadline -lncursesw" \
+    --with-readline-cflags="-I${SYSROOT}/usr/include" \
+    --with-readline-ldflags="-L${SYSROOT}/usr/lib -lreadline -lncursesw" \
     --enable-session \
     --enable-fts3 \
     --enable-fts4 \
