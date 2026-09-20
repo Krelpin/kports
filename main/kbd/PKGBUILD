@@ -1,0 +1,31 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=kbd
+pkgver=2.7.1
+pkgrel=1
+pkgdesc='Keytable files and keyboard utilities'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://kbd-project.org/'
+license=('GPL-2.0-or-later')
+depends=('glibc')
+source=("https://www.kernel.org/pub/linux/utils/kbd/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --bindir=/usr/bin \
+    --sbindir=/usr/bin \
+    --libdir=/usr/lib \
+    --datadir=/usr/share/kbd \
+    --localedir=/usr/share/locale \
+    --disable-vlock \
+    --enable-optional-progs
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
