@@ -153,7 +153,9 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
 	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
 	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/aarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig"
-	export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:$SYSROOT/usr/lib:${LD_LIBRARY_PATH:-}"
+	# No trailing colon: an empty element means the current directory, which
+	# GCC refuses to build with.
+	export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:$SYSROOT/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 fi
 
 # Point makepkg to sysroot pacman so dependency checks evaluate against Krelpin's sysroot
@@ -170,8 +172,8 @@ fi
 
 # Ensure local packaging utilities (makepkg, repo-add) are accessible
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-[ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib:${LIBRARY_PATH:-}"
-[ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib:${LD_LIBRARY_PATH:-}"
+[ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+[ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 if [ -n "$SYNC_DEST" ] && [ ${#TARGET_PKGS[@]} -eq 0 ] && [ "$ALL_PKGS" != "yes" ]; then
 	echo ">>> Syncing Krelpin $ARCH repository to $SYNC_DEST..."
