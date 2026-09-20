@@ -41,6 +41,9 @@ package() {
 
   # Compatibility symlinks for non-wide ncurses
   for lib in ncurses form panel menu tinfo; do
+    # Runtime SONAME: everything linked against lib${lib}.so.6 (bash wants
+    # libtinfo.so.6) needs a real file, the linker script below is link-time only.
+    ln -sf lib${lib}w.so.${pkgver%%.*} "${pkgdir}/usr/lib/lib${lib}.so.${pkgver%%.*}"
     echo "INPUT(-l${lib}w)" > "${pkgdir}/usr/lib/lib${lib}.so"
     ln -sf lib${lib}w.a "${pkgdir}/usr/lib/lib${lib}.a"
     ln -sf ${lib}w.pc "${pkgdir}/usr/lib/pkgconfig/${lib}.pc"
