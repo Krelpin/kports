@@ -153,6 +153,8 @@ if [ "$ALLOW_HOST_TOOLCHAIN" != "yes" ]; then
 	export CPPFLAGS="--sysroot=$SYSROOT ${CPPFLAGS:-}"
 	export PKG_CONFIG_SYSROOT_DIR="$SYSROOT"
 	export PKG_CONFIG_LIBDIR="$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/lib/aarch64-linux-gnu/pkgconfig:$SYSROOT/usr/share/pkgconfig"
+	# Host libraries first, so makepkg's own tools keep working. A package
+	# that has to run what it just built puts the sysroot first itself.
 	# No trailing colon: an empty element means the current directory, which
 	# GCC refuses to build with.
 	export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:$SYSROOT/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
