@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=wayland-protocols
+pkgver=1.41
+pkgrel=1
+pkgdesc='Specifications of extended Wayland protocols'
+arch=('any')
+url='https://wayland.freedesktop.org/'
+license=('MIT')
+depends=('wayland')
+makedepends=('meson' 'ninja')
+source=("https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${pkgver}/downloads/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Dtests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

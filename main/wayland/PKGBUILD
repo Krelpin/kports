@@ -1,0 +1,29 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=wayland
+pkgver=1.23.1
+pkgrel=1
+pkgdesc='A computer display server protocol'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://wayland.freedesktop.org/'
+license=('MIT')
+# TODO: add default-cursors once ported
+depends=('glibc' 'libffi' 'expat' 'libxml2')
+makedepends=('meson' 'ninja')
+provides=('libwayland-client.so' 'libwayland-cursor.so' 'libwayland-egl.so' 'libwayland-server.so')
+source=("https://gitlab.freedesktop.org/wayland/wayland/-/releases/${pkgver}/downloads/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Ddocumentation=false \
+    -Dtests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}
