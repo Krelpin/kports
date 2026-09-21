@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=python-yaml
+_name=PyYAML
+pkgver=6.0.2
+pkgrel=1
+pkgdesc='Python bindings for YAML, using fast libYAML library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://pyyaml.org/wiki/PyYAML'
+license=('MIT')
+depends=('python' 'libyaml')
+makedepends=('python-setuptools')
+source=("https://pypi.io/packages/source/${_name::1}/${_name}/${_name,,}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${_name,,}-${pkgver}"
+  LD_LIBRARY_PATH="${SYSROOT}/usr/lib" python setup.py build
+}
+
+package() {
+  cd "${_name,,}-${pkgver}"
+  LD_LIBRARY_PATH="${SYSROOT}/usr/lib" python setup.py install \
+    --root="${pkgdir}" --prefix=/usr --optimize=1 --skip-build
+}

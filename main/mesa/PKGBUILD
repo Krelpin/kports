@@ -1,0 +1,39 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=mesa
+pkgver=26.2.3
+pkgrel=1
+pkgdesc='Open-source OpenGL drivers, built here only for the GBM loader'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.mesa3d.org/'
+license=('MIT')
+# EGL, GLESv2 and the GL driver come from libhybris on this target, so only
+# the GBM loader is built; libgbm-hybris plugs into it as the backend.
+depends=('glibc' 'libdrm' 'expat' 'zlib' 'zstd' 'wayland')
+makedepends=('meson' 'ninja' 'python' 'python-mako' 'wayland-protocols')
+provides=('libgbm.so')
+source=("https://archive.mesa3d.org/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dplatforms=wayland \
+    -Dgallium-drivers= \
+    -Dvulkan-drivers= \
+    -Dgbm=enabled \
+    -Dglx=disabled \
+    -Degl=disabled \
+    -Dopengl=false \
+    -Dgles1=disabled \
+    -Dgles2=disabled \
+    -Dllvm=disabled \
+    -Dlmsensors=disabled \
+    -Dvideo-codecs= \
+    -Dbuild-tests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

@@ -34,4 +34,10 @@ build() {
 package() {
   cd "${pkgname}-${_commit}"*/hybris 2>/dev/null || cd "${pkgname}-${_commit}/hybris"
   make DESTDIR="${pkgdir}" install
+
+  # Upstream leaves several headers out of the install rules
+  cd include/hybris
+  for _h in $(find . -name '*.h'); do
+    install -Dm644 "${_h}" "${pkgdir}/usr/include/hybris/${_h#./}"
+  done
 }

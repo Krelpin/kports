@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=python-markupsafe
+_name=${pkgname#python-}
+pkgver=3.0.2
+pkgrel=1
+pkgdesc='Implements a XML/HTML/XHTML Markup safe string for Python'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://palletsprojects.com/p/markupsafe/'
+license=('BSD-3-Clause')
+depends=('python')
+makedepends=('python-setuptools')
+source=("https://pypi.io/packages/source/${_name::1}/${_name}/${_name}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${_name}-${pkgver}"
+  LD_LIBRARY_PATH="${SYSROOT}/usr/lib" python setup.py build
+}
+
+package() {
+  cd "${_name}-${pkgver}"
+  LD_LIBRARY_PATH="${SYSROOT}/usr/lib" python setup.py install \
+    --root="${pkgdir}" --prefix=/usr --optimize=1 --skip-build
+}

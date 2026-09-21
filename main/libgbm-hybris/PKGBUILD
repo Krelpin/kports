@@ -1,0 +1,35 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libgbm-hybris
+pkgver=1.0.r$(date +%Y%m%d)
+_commit=master
+pkgrel=1
+pkgdesc='GBM backend that allocates through the Android gralloc HAL'
+arch=('aarch64' 'armv7h')
+url='https://github.com/droidian/libgbm-hybris'
+license=('MIT')
+depends=('libhybris' 'mesa' 'libdrm')
+makedepends=('cmake' 'ninja' 'android-headers')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/droidian/${pkgname}/archive/refs/heads/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${pkgname}-${_commit}"
+  # Upstream hardcodes a Debian multiarch path and a debug build
+  sed -i -e "s|/usr/lib/aarch64-linux-gnu/gbm/|/usr/lib/gbm/|" \
+         -e "s|include_directories(/usr/include/android/ /usr/include/libdrm)|include_directories(${SYSROOT}/usr/include/android ${SYSROOT}/usr/include/libdrm)|" \
+         -e "s|link_directories(/usr/lib/aarch64-linux-gnu)|link_directories(${SYSROOT}/usr/lib)|" \
+         -e "s|set(CMAKE_BUILD_TYPE Debug)|set(CMAKE_BUILD_TYPE Release)|" \
+         CMakeLists.txt
+}
+
+build() {
+  cmake -B build -S "${pkgname}-${_commit}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

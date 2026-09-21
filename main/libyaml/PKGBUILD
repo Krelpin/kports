@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libyaml
+pkgver=0.2.5
+pkgrel=1
+pkgdesc='YAML 1.1 parser and emitter written in C'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://pyyaml.org/wiki/LibYAML'
+license=('MIT')
+depends=('glibc')
+provides=('libyaml.so')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/yaml/${pkgname}/archive/${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./bootstrap
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
