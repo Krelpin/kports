@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=extra-cmake-modules
+pkgver=6.11.0
+pkgrel=1
+pkgdesc='Extra modules and scripts for CMake'
+arch=('any')
+url='https://community.kde.org/Frameworks'
+license=('BSD-3-Clause')
+depends=('cmake')
+makedepends=('ninja' 'python')
+source=("https://download.kde.org/stable/frameworks/${pkgver%.*}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -B build -S "${pkgname}-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_TESTING=OFF \
+    -DBUILD_HTML_DOCS=OFF \
+    -DBUILD_MAN_DOCS=OFF
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}
