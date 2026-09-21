@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=npth
+pkgver=1.8
+pkgrel=1
+pkgdesc='The new GNU portable threads library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/software/npth/index.html'
+license=('LGPL-2.1-or-later')
+depends=('bash' 'glibc')
+provides=('libnpth.so')
+source=("https://gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

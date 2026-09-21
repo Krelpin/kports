@@ -1,0 +1,22 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libksba
+pkgver=1.8.1
+pkgrel=1
+pkgdesc='Library for working with X.509 certificates, CMS data and related objects'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/related_software/libksba/'
+license=('GPL-2.0-only' 'GPL-3.0-only' 'LGPL-3.0-only')
+depends=('bash' 'glibc' 'libgpg-error')
+source=("https://www.gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

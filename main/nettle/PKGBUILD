@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=nettle
+pkgver=4.0
+pkgrel=1
+pkgdesc='A low-level cryptographic library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.lysator.liu.se/~nisse/nettle/'
+license=('GPL-2.0-or-later' 'LGPL-3.0-or-later')
+depends=('glibc' 'gmp')
+provides=('libnettle.so' 'libhogweed.so')
+source=("https://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --disable-static
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

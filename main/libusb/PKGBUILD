@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libusb
+pkgver=1.0.30
+pkgrel=1
+pkgdesc='A cross-platform user library to access USB devices'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://libusb.info/'
+license=('LGPL-2.1-or-later')
+depends=('glibc')
+provides=('libusb-1.0.so')
+source=("https://github.com/libusb/libusb/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

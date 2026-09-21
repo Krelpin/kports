@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libassuan
+pkgver=3.0.0
+pkgrel=1
+pkgdesc='IPC library used by some GnuPG related software'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/related_software/libassuan/'
+license=('FSFULLR' 'GPL-2.0-or-later' 'LGPL-2.1-or-later')
+depends=('bash' 'glibc' 'libgpg-error')
+provides=('libassuan.so')
+source=("https://www.gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --disable-static
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

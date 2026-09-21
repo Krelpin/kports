@@ -1,0 +1,30 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gpgme
+pkgver=2.2.0
+pkgrel=1
+pkgdesc='C wrapper library for GnuPG'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/related_software/gpgme/'
+license=('GPL-2.0-or-later' 'LGPL-2.0-or-later' 'LGPL-2.1-or-later' 'MIT')
+depends=('glibc' 'libassuan' 'libgpg-error' 'gnupg>=2')
+provides=('libgpgme.so')
+options=('!emptydirs')
+source=("https://www.gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --disable-fd-passing \
+    --disable-static \
+    --disable-gpgsm-test
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+  rm "${pkgdir}/usr/lib/pkgconfig/gpgme-glib.pc"
+  install -Dm644 "${pkgname}-${pkgver}/LICENSES" "${pkgdir}/usr/share/licenses/${pkgname}/MIT.txt"
+}
