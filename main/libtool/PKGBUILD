@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libtool
+pkgver=2.5.4
+pkgrel=1
+pkgdesc='A generic library support script'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnu.org/software/libtool/'
+license=('GPL-2.0-or-later')
+depends=('sh' 'tar' 'glibc' 'gcc-libs')
+source=("https://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

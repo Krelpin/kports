@@ -1,0 +1,33 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libhybris
+pkgver=0.1.0.r7079712
+_commit=7079712a
+pkgrel=1
+pkgdesc='Library to load Android bionic HAL libraries into glibc processes'
+arch=('aarch64' 'armv7h')
+url='https://github.com/libhybris/libhybris'
+license=('Apache-2.0' 'LGPL-2.1-only' 'MIT')
+depends=('glibc')
+makedepends=('android-headers' 'libtool' 'pkgconf')
+provides=('libhybris-common.so' 'libhardware.so' 'libandroid-properties.so')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/libhybris/${pkgname}/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${_commit}"*/hybris 2>/dev/null || cd "${pkgname}-${_commit}/hybris"
+  ACLOCAL_PATH="${SYSROOT}/usr/share/aclocal" NOCONFIGURE=1 ./autogen.sh
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --with-android-headers="${SYSROOT}/usr/include/android" \
+    --enable-arch=arm64 \
+    --enable-wayland \
+    --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${_commit}"*/hybris 2>/dev/null || cd "${pkgname}-${_commit}/hybris"
+  make DESTDIR="${pkgdir}" install
+}

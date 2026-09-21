@@ -1,0 +1,22 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=android-headers
+pkgver=16.0
+pkgrel=1
+pkgdesc='Android platform headers used to build against the vendor HALs'
+arch=('any')
+url='https://github.com/Halium/android-headers'
+license=('Apache-2.0')
+_branch="halium-${pkgver}"
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Halium/${pkgname}/archive/refs/heads/${_branch}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "${pkgname}-${_branch}"
+  install -dm755 "${pkgdir}/usr/include/android"
+  cp -a android hardware hardware_legacy cutils "${pkgdir}/usr/include/android/" 2>/dev/null || true
+  for _f in android-config.h android-version.h; do
+    [ -f "$_f" ] && install -Dm644 "$_f" "${pkgdir}/usr/include/android/$_f"
+  done
+  install -Dm644 android-headers.pc "${pkgdir}/usr/lib/pkgconfig/android-headers.pc" 2>/dev/null || true
+}

@@ -1,0 +1,30 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libxkbcommon
+pkgver=1.8.1
+pkgrel=1
+pkgdesc='Keyboard handling library using XKB data'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://xkbcommon.org/'
+license=('MIT')
+# TODO: build the x11 backend once libxcb is ported; Plasma Mobile is
+# Wayland only, so it is not needed to bring the shell up
+depends=('glibc' 'libxml2' 'xkeyboard-config' 'wayland')
+makedepends=('meson' 'ninja' 'python' 'wayland-protocols')
+provides=('libxkbcommon.so' 'libxkbregistry.so')
+source=("https://github.com/xkbcommon/${pkgname}/archive/xkbcommon-${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-xkbcommon-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Denable-docs=false \
+    -Denable-x11=false \
+    -Denable-wayland=true \
+    -Dxkb-config-root=/usr/share/X11/xkb
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}
