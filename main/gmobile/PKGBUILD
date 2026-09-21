@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gmobile
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Mobile form-factor helpers used by Phoc and Phosh'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/World/Phosh/gmobile'
+license=('LGPL-2.1-or-later')
+depends=('glib2' 'json-glib')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libgmobile.so')
+source=("https://gitlab.gnome.org/World/Phosh/${pkgname}/-/archive/v${pkgver}/${pkgname}-v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-v${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dexamples=false -Dtests=false -Dgtk_doc=false -Dintrospection=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

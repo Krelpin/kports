@@ -1,0 +1,41 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=networkmanager
+pkgver=1.48.10
+pkgrel=1
+pkgdesc='Network connection manager and libnm client library'
+arch=('aarch64' 'armv7h')
+url='https://networkmanager.dev'
+license=('GPL-2.0-or-later' 'LGPL-2.1-or-later')
+depends=('dbus' 'eudev' 'glib2' 'libndp' 'util-linux')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libnm')
+source=("https://download.gnome.org/sources/NetworkManager/1.48/NetworkManager-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "NetworkManager-${pkgver}"
+  # The null-crypto configuration omits systemd's app-specific ID helper,
+  # while the bundled DHCP code still calls it.  The machine ID retains the
+  # stable per-device DUID property without pulling in a TLS stack.
+  sed -i 's/sd_id128_get_machine_app_specific(APPLICATION_ID, &machine_id)/sd_id128_get_machine(\&machine_id)/' \
+    src/libnm-systemd-core/src/libsystemd-network/sd-dhcp-duid.c
+}
+
+build() {
+  meson setup "NetworkManager-${pkgver}" build-${pkgver} \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dsession_tracking=no -Dsuspend_resume=consolekit \
+    -Dpolkit=false -Dselinux=false -Dsystemd_journal=false -Dlibaudit=no \
+    -Dwifi=true -Dppp=false -Dmodem_manager=false -Dconcheck=false \
+    -Dovs=false -Dnmcli=false -Dnmtui=false -Dnm_cloud_setup=false \
+    -Difupdown=false -Dintrospection=false -Dvapi=false -Ddocs=false \
+    -Dtests=no -Dfirewalld_zone=false -Dlibpsl=false -Dcrypto=null \
+    -Dqt=false -Dreadline=none -Dudev_dir=/usr/lib/udev \
+    -Dsystemdsystemunitdir=no
+  meson compile -C build-${pkgver}
+}
+
+package() {
+  meson install -C build-${pkgver} --destdir "${pkgdir}"
+}

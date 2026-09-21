@@ -1,0 +1,22 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libgcrypt
+pkgver=1.11.0
+pkgrel=1
+pkgdesc='General purpose cryptographic library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/software/libgcrypt/'
+license=('LGPL-2.1-or-later')
+depends=('libgpg-error')
+source=("https://www.gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --disable-static --disable-doc
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

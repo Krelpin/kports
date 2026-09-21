@@ -1,0 +1,56 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=phosh
+pkgver=0.17.0
+pkgrel=2
+pkgdesc='Pure Wayland shell for mobile devices'
+arch=('aarch64' 'armv7h')
+url='https://gitlab.gnome.org/World/Phosh/phosh'
+license=('GPL-3.0-or-later')
+depends=('eudev' 'fribidi' 'gcr' 'glib2' 'gnome-desktop'
+         'gsettings-desktop-schemas' 'gtk3' 'libcallaudio' 'libfeedback' 'libgudev'
+         'networkmanager' 'libsecret' 'phoc' 'polkit' 'pulseaudio' 'upower' 'wayland'
+         'linux-pam' 'hicolor-icon-theme' 'adwaita-icon-theme')
+makedepends=('meson' 'ninja' 'pkgconf' 'wayland-protocols')
+source=("https://download.gnome.org/sources/${pkgname}/0.17/${pkgname}-${pkgver}.tar.xz"
+        "no-systemd.patch"
+        "org.gnome.mutter.gschema.xml"
+        "org.gnome.settings-daemon.peripherals.gschema.xml"
+        "org.gnome.shell.gschema.xml")
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
+
+prepare() {
+  cd "${pkgname}-${pkgver}"
+  # The historical wrap files tracked moving master branches. Pin releases
+  # from the same Phosh generation so rebuilds remain API-compatible.
+  sed -i 's/revision=origin\/master/revision=v0.0.1/' \
+    subprojects/libfeedback.wrap
+  sed -i 's/revision=origin\/master/revision=1.6.0/' \
+    subprojects/libhandy.wrap
+
+  patch -p1 < "${srcdir}/no-systemd.patch"
+}
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    --wrap-mode=default \
+    -Dtests=false -Dphoc_tests=disabled -Dgtk_doc=false \
+    -Dsystemd=false -Dtools=false -Dcompositor=/usr/bin/phoc
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+
+  # Install required desktop schemas not provided elsewhere
+  install -d -m 755 "${pkgdir}/usr/share/glib-2.0/schemas"
+  install -m 644 "${srcdir}/org.gnome.mutter.gschema.xml" \
+                 "${srcdir}/org.gnome.settings-daemon.peripherals.gschema.xml" \
+                 "${srcdir}/org.gnome.shell.gschema.xml" \
+                 "${pkgdir}/usr/share/glib-2.0/schemas/"
+}

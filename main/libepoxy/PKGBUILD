@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libepoxy
+pkgver=1.5.10
+pkgrel=1
+pkgdesc='Library for handling OpenGL function pointer management'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/anholt/libepoxy'
+license=('MIT')
+depends=('glibc' 'libhybris')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libepoxy.so')
+source=("https://github.com/anholt/${pkgname}/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dx11=false -Dglx=no -Degl=yes -Dtests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

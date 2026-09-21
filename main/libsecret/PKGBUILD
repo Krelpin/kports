@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libsecret
+pkgver=0.21.4
+pkgrel=1
+pkgdesc='Library for storing and retrieving passwords and other secrets'
+arch=('aarch64' 'armv7h')
+url='https://wiki.gnome.org/Projects/Libsecret'
+license=('LGPL-2.1-or-later')
+depends=('glib2' 'libgcrypt')
+makedepends=('meson' 'ninja' 'pkgconf')
+source=("https://download.gnome.org/sources/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=false -Dgtk_doc=false -Dmanpage=false -Dvapi=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

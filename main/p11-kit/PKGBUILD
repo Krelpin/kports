@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=p11-kit
+pkgver=0.25.5
+pkgrel=1
+pkgdesc='PKCS#11 module loading and trust policy library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://p11-glue.github.io/p11-glue/p11-kit.html'
+license=('BSD-3-Clause')
+depends=('libffi' 'libtasn1')
+makedepends=('meson' 'ninja' 'pkgconf')
+source=("https://github.com/p11-glue/p11-kit/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dgtk_doc=false -Dman=false -Dtest=false -Dsystemd=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

@@ -1,0 +1,34 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gnome-desktop
+pkgver=40.0
+pkgrel=1
+pkgdesc='GNOME desktop utility library used by Phoc'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/gnome-desktop'
+license=('GPL-2.0-or-later' 'LGPL-2.1-or-later')
+depends=('gdk-pixbuf2' 'glib2' 'gsettings-desktop-schemas' 'gtk3'
+         'iso-codes' 'libxkbcommon' 'xkeyboard-config' 'libseccomp')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libgnome-desktop-3.so')
+source=("https://download.gnome.org/sources/${pkgname}/40/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+prepare() {
+  # Phoc links to the C library; generating language bindings would pull the
+  # complete gobject-introspection toolchain into the mobile base image.
+  sed -i '/gnome.generate_gir(/,/^)/d' \
+    "${pkgname}-${pkgver}/libgnome-desktop/meson.build"
+}
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dgtk_doc=false -Ddesktop_docs=false -Ddebug_tools=false \
+    -Dinstalled_tests=false -Dudev=disabled -Dsystemd=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

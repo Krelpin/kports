@@ -1,0 +1,21 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libgpg-error
+pkgver=1.51
+pkgrel=1
+pkgdesc='Common error values for GnuPG components'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnupg.org/software/libgpg-error/'
+license=('LGPL-2.1-or-later')
+source=("https://www.gnupg.org/ftp/gcrypt/${pkgname}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --disable-static
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

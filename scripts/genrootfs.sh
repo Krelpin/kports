@@ -84,13 +84,22 @@ fi
 
 # Default packages: Toolchains + Coreutils & Base System + OpenRC & Networking
 if [ $# -eq 0 ]; then
-	set -- filesystem glibc gcc binutils linux-api-headers make patch pkgconf \
-		coreutils bash pacman pacman-mirrorlist krelpin-keyring \
-		tar gzip bzip2 xz zstd findutils grep sed gawk diffutils \
-		file which curl util-linux iproute2 kmod shadow doas e2fsprogs \
-		openrc halium-overlay dhcpcd libnl iw libcap procps-ng inetutils kbd \
-		ncurses readline openssl expat dbus pcsclite wpa_supplicant tzdata \
-		gcc-libs zlib libxcrypt libarchive
+	set -- acl adwaita-icon-theme android-headers at-spi2-core attr bash binutils\
+		brotli bzip2 cairo coreutils curl dbus dhcpcd diffutils doas e2fsprogs\
+		eudev expat file filesystem findutils fontconfig freetype fribidi gawk gcc\
+		gcc-libs gcr gdk-pixbuf2 gettext glib2 glibc gmobile gnome-desktop\
+		graphite grep gsettings-desktop-schemas gtk3 gzip halium-overlay harfbuzz\
+		hicolor-icon-theme icu inetutils iproute2 iso-codes iw json-glib kbd kmod\
+		krelpin-keyring libarchive libcallaudio libcap libdisplay-info libdrm\
+		libdroid libepoxy libevdev libfeedback libffi libgbinder libgbm-hybris\
+		libgcrypt libglibutil libgpg-error libgudev libhybris libinput\
+		libjpeg-turbo libliftoff libndp libnl libpciaccess libpng libseccomp\
+		libsecret libsndfile libtasn1 libunistring libxcrypt libxkbcommon libxml2\
+		linux-api-headers linux-pam make mesa mtdev ncurses networkmanager openrc\
+		openssl p11-kit pacman pacman-mirrorlist pango patch pcre2 pcsclite phoc\
+		phosh pixman pkgconf polkit procps-ng pulseaudio readline seatd sed shadow\
+		shared-mime-info tar tzdata upower util-linux wayland wayland-protocols\
+		which wlroots wpa_supplicant xkeyboard-config xz zlib zstd
 fi
 
 PACMAN_BIN="${PACMAN:-pacman}"

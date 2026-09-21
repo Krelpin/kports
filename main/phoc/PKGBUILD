@@ -1,0 +1,38 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=phoc
+pkgver=0.47.0.droidian
+pkgrel=1
+_commit=7e682c63765665206b7a433e3ac06dc8c354f7c5
+pkgdesc='Wayland compositor for mobile phones, with Droidian hwcomposer support'
+arch=('aarch64' 'armv7h')
+url='https://github.com/droidian/phoc'
+license=('GPL-3.0-or-later')
+depends=('eudev' 'glib2' 'gmobile' 'gnome-desktop'
+         'gsettings-desktop-schemas' 'libdrm' 'libinput' 'libxkbcommon'
+         'pixman' 'wayland' 'wlroots')
+makedepends=('meson' 'ninja' 'pkgconf' 'wayland-protocols')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/droidian/phoc/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${pkgname}-${_commit}"
+  # Upstream already guards every Xwayland use but not these two includes.
+  # Keep the Wayland-only build independent of wlroots' optional X11 headers.
+  sed -i '/#include <wlr\/xwayland.h>/i #ifdef PHOC_XWAYLAND' src/server.c
+  sed -i '/#include <wlr\/xwayland\/shell.h>/a #endif' src/server.c
+  sed -i '/#include <wlr\/xwayland.h>/d; /#include <xcb\/xproto.h>/d' \
+    src/xdg-toplevel.c
+}
+
+build() {
+  meson setup "${pkgname}-${_commit}" "build-${_commit}" \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dembed-wlroots=disabled -Dxwayland=disabled -Dtests=false \
+    -Dgtk_doc=false -Dman=false -Ddtrace=disabled
+  meson compile -C "build-${_commit}"
+}
+
+package() {
+  meson install -C "build-${_commit}" --destdir "${pkgdir}"
+}

@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libfeedback
+pkgver=0.0.1
+pkgrel=1
+_commit=99c12e77d830ac8b0316c032bddd3ef082c66c72
+pkgdesc='Client library for triggering user feedback'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://source.puri.sm/Librem5/feedbackd'
+license=('LGPL-3.0-or-later')
+depends=('glib2')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libfeedback-0.0.so')
+source=("feedbackd-${_commit}.tar.gz::https://source.puri.sm/Librem5/feedbackd/-/archive/${_commit}/feedbackd-${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "feedbackd-${_commit}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Ddaemon=false -Dintrospection=disabled -Dvapi=false \
+    -Dgtk_doc=false -Dman=false -Dtests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

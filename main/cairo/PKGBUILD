@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=cairo
+pkgver=1.18.4
+pkgrel=1
+pkgdesc='2D graphics library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://cairographics.org/'
+license=('LGPL-2.1-only' 'MPL-1.1')
+depends=('fontconfig' 'freetype' 'glib2' 'libpng' 'pixman' 'zlib')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libcairo.so')
+source=("https://cairographics.org/releases/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dxlib=disabled -Dxcb=disabled -Dtests=disabled \
+    -Dgtk2-utils=disabled -Dspectre=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

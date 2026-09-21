@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pango
+pkgver=1.56.4
+pkgrel=1
+pkgdesc='Text layout and rendering library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/pango'
+license=('LGPL-2.1-or-later')
+depends=('cairo' 'fontconfig' 'freetype' 'fribidi' 'glib2' 'harfbuzz')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libpango-1.0.so' 'libpangocairo-1.0.so')
+source=("https://download.gnome.org/sources/${pkgname}/1.56/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=disabled -Ddocumentation=false \
+    -Dbuild-testsuite=false -Dbuild-examples=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

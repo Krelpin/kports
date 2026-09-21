@@ -1,0 +1,33 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libdroid
+pkgver=0.2.1
+pkgrel=1
+_commit=87e22ff552e1aed6978757e51cb81eaf159ffd6a
+pkgdesc='GLib helpers for Android HAL integration'
+arch=('aarch64' 'armv7h')
+url='https://github.com/droidian/libdroid'
+license=('BSD-3-Clause')
+depends=('glib2' 'libgbinder')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libdroid-0.so')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/droidian/libdroid/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${pkgname}-${_commit}"
+  # wlroots needs the core HAL library only. Keep the optional systemd HAL
+  # daemons and introspection generator out of the OpenRC mobile base.
+  sed -i "/subdir('hals')/d" meson.build
+  sed -i '/gnome = import/,/^)/d' include/libdroid/meson.build
+}
+
+build() {
+  meson setup "${pkgname}-${_commit}" build \
+    --prefix=/usr --libdir=lib --buildtype=release
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

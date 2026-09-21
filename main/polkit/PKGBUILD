@@ -1,0 +1,31 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=polkit
+pkgver=123
+pkgrel=1
+pkgdesc='Authorization API and agent libraries'
+arch=('aarch64' 'armv7h')
+url='https://gitlab.freedesktop.org/polkit/polkit'
+license=('LGPL-2.0-or-later')
+depends=('expat' 'glib2')
+makedepends=('meson' 'ninja' 'pkgconf')
+source=("${url}/-/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${pkgname}-${pkgver}"
+  sed -i "s/subdir('polkitagent')//" src/meson.build
+  sed -i "/subdir('polkit')/a subdir('polkitagent')" src/meson.build
+}
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build-${pkgver}-shadow \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dlibs-only=true -Dauthfw=shadow -Dintrospection=false -Dtests=false \
+    -Dexamples=false -Dgtk_doc=false -Dman=false
+  meson compile -C build-${pkgver}-shadow
+}
+
+package() {
+  meson install -C build-${pkgver}-shadow --destdir "${pkgdir}"
+}

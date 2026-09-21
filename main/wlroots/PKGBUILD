@@ -1,0 +1,46 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=wlroots
+pkgver=0.17.4.droidian.18backport
+_commit=e7f6be5105b009a025b033ab696c34b287011156
+pkgrel=1
+pkgdesc='Droidian wlroots with Android hwcomposer support'
+arch=('aarch64' 'armv7h')
+url='https://github.com/droidian/wlroots'
+license=('MIT')
+depends=('android-headers' 'eudev' 'libdroid' 'libdrm' 'libgbm-hybris' 'libhybris'
+         'libinput' 'libliftoff' 'libxkbcommon' 'mesa' 'pixman' 'seatd'
+         'wayland' 'wayland-protocols' 'libdisplay-info')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libwlroots.so' 'wlroots=0.17.4')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/droidian/${pkgname}/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "${pkgname}-${_commit}"
+
+  # This branch was written against Droidian's newer libhybris helper.  The
+  # public Android native-window API provides the same operation and also
+  # works with the upstream libhybris used by Krelpin.
+  sed -i '/#include <sync\/sync.h>/a #include <system/window.h>' \
+    backend/hwcomposer/output.c
+  sed -i 's/HWCNativeWindowSetBufferCount/native_window_set_buffer_count/' \
+    backend/hwcomposer/output.c
+}
+
+build() {
+  meson setup "${pkgname}-${_commit}" "build-${_commit}" \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dbackends=hwcomposer,drm,libinput \
+    -Drenderers=gles2,android \
+    -Dallocators=gbm \
+    -Dsession=enabled \
+    -Dxwayland=disabled \
+    -Dexamples=false \
+    -Ddroidian-extensions=true
+  meson compile -C "build-${_commit}"
+}
+
+package() {
+  meson install -C "build-${_commit}" --destdir "${pkgdir}"
+}

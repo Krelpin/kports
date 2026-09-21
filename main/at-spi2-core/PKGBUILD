@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=at-spi2-core
+pkgver=2.56.2
+pkgrel=1
+pkgdesc='Protocol definitions and daemon for D-Bus accessibility'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/at-spi2-core'
+license=('LGPL-2.1-or-later')
+depends=('dbus' 'glib2')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libatk-1.0.so' 'libatk-bridge-2.0.so' 'libatspi.so')
+source=("https://download.gnome.org/sources/${pkgname}/2.56/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dx11=disabled -Dintrospection=disabled -Ddocs=false \
+    -Duse_systemd=false -Dgtk2_atk_adaptor=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

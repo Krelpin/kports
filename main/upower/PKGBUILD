@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=upower
+pkgver=0.99.20
+pkgrel=1
+pkgdesc='Abstraction for enumerating power devices and querying history and statistics'
+arch=('aarch64' 'armv7h')
+url='https://upower.freedesktop.org'
+license=('GPL-2.0-or-later')
+depends=('glib2' 'libgudev' 'eudev')
+makedepends=('meson' 'ninja' 'pkgconf')
+source=("https://gitlab.freedesktop.org/upower/upower/-/archive/v${pkgver}/upower-v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-v${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=disabled -Dgtk-doc=false -Dman=false \
+    -Dsystemdsystemunitdir=no -Didevice=disabled \
+    -Dudevrulesdir=/usr/lib/udev/rules.d -Dudevhwdbdir=/usr/lib/udev/hwdb.d
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

@@ -180,8 +180,9 @@ export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 # Build tools that live in the sysroot are newer than the host copies, but they
 # link the sysroot glibc. Put wrappers ahead of the host ones so builds get the
 # right version without moving the sysroot in front of the host libraries.
-KRELPIN_BINDIR="$(mktemp -d -t krelpin-bin.XXXXXX)"
-for _tool in meson ninja cmake python python3 libtool libtoolize; do
+KRELPIN_BINDIR="$kports_root/.bin"
+mkdir -p "$KRELPIN_BINDIR"
+for _tool in meson ninja cmake python python3 libtool libtoolize glib-compile-schemas glib-compile-resources glib-genmarshal glib-mkenums gdbus-codegen; do
 	[ -x "$SYSROOT/usr/bin/$_tool" ] || continue
 	cat << EOF > "$KRELPIN_BINDIR/$_tool"
 #!/bin/sh
@@ -190,7 +191,7 @@ LD_LIBRARY_PATH="$SYSROOT/usr/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}" \
 EOF
 	chmod +x "$KRELPIN_BINDIR/$_tool"
 done
-trap 'rm -rf "$KRELPIN_BINDIR" "${PACMAN_WRAPPER:-}" "${MAKEPKG_CONF:-}"' EXIT
+trap 'rm -f "${PACMAN_WRAPPER:-}" "${MAKEPKG_CONF:-}"' EXIT
 export PATH="$KRELPIN_BINDIR:$PATH"
 
 # libtoolize resolves its data files through absolute /usr paths and wants

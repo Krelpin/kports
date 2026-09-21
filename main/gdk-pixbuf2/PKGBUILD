@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gdk-pixbuf2
+_srcname=gdk-pixbuf
+pkgver=2.42.12
+pkgrel=1
+pkgdesc='Image loading library for GTK'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/gdk-pixbuf'
+license=('LGPL-2.1-or-later')
+depends=('glib2' 'libjpeg-turbo' 'libpng' 'shared-mime-info')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libgdk_pixbuf-2.0.so')
+source=("https://download.gnome.org/sources/${_srcname}/2.42/${_srcname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${_srcname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=disabled -Dgtk_doc=false -Dman=false \
+    -Dtests=false -Dinstalled_tests=false -Dtiff=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

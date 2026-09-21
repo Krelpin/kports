@@ -1,0 +1,34 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pulseaudio
+pkgver=15.0
+pkgrel=1
+pkgdesc='PulseAudio client libraries for Phosh volume control'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.freedesktop.org/wiki/Software/PulseAudio/'
+license=('LGPL-2.1-or-later')
+depends=('dbus' 'glib2' 'libsndfile')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libpulse.so')
+source=("https://www.freedesktop.org/software/pulseaudio/releases/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Ddaemon=false -Ddoxygen=false -Dman=false -Dtests=false \
+    -Ddatabase=simple -Dalsa=disabled -Dasyncns=disabled \
+    -Davahi=disabled -Dbluez5=disabled -Ddbus=enabled \
+    -Delogind=disabled -Dfftw=disabled -Dglib=enabled \
+    -Dgsettings=disabled -Dgtk=disabled -Djack=disabled \
+    -Dlirc=disabled -Dopenssl=disabled -Dorc=disabled \
+    -Doss-output=disabled -Dsoxr=disabled -Dspeex=disabled \
+    -Dsystemd=disabled -Dtcpwrap=disabled -Dudev=disabled \
+    -Dvalgrind=disabled -Dx11=disabled -Dwebrtc-aec=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+  ln -sf pulseaudio/libpulsecommon-${pkgver}.so "${pkgdir}/usr/lib/libpulsecommon-${pkgver}.so"
+}

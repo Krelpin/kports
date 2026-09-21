@@ -1,0 +1,30 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gtk3
+_srcname=gtk
+pkgver=3.24.52
+pkgrel=1
+pkgdesc='GObject-based multi-platform GUI toolkit, Wayland build'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gtk.org/'
+license=('LGPL-2.1-or-later')
+depends=('at-spi2-core' 'cairo' 'gdk-pixbuf2' 'glib2' 'libepoxy'
+         'libxkbcommon' 'pango' 'wayland' 'wayland-protocols')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libgtk-3.so' 'libgdk-3.so')
+source=("https://download.gnome.org/sources/${_srcname}/3.24/${_srcname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${_srcname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dx11_backend=false -Dwayland_backend=true \
+    -Dbroadway_backend=false -Dintrospection=false \
+    -Ddemos=false -Dexamples=false -Dtests=false \
+    -Dinstalled_tests=false -Dman=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

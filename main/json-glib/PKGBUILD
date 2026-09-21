@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=json-glib
+pkgver=1.10.8
+pkgrel=1
+pkgdesc='GLib JSON manipulation library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/json-glib'
+license=('LGPL-2.1-or-later')
+depends=('glib2')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('libjson-glib-1.0.so')
+source=("https://download.gnome.org/sources/${pkgname}/1.10/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dintrospection=disabled -Dtests=false -Dgtk_doc=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

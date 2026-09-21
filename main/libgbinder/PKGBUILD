@@ -1,0 +1,22 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libgbinder
+pkgver=1.1.52
+pkgrel=1
+_commit=e906afcffbfa51b7fbefe042a13b933d9e8dfdd9
+pkgdesc='GLib bindings for the Android Binder IPC mechanism'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/mer-hybris/libgbinder'
+license=('BSD-3-Clause')
+depends=('glib2' 'libglibutil')
+makedepends=('pkgconf')
+source=("${pkgname}-${_commit}.tar.gz::https://github.com/mer-hybris/libgbinder/archive/${_commit}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  make -C "${pkgname}-${_commit}" release pkgconfig KEEP_SYMBOLS=1
+}
+
+package() {
+  make -C "${pkgname}-${_commit}" DESTDIR="${pkgdir}" LIBDIR=usr/lib install-dev
+}

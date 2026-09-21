@@ -112,7 +112,14 @@ profile_standard() {
 	# 3. Mobile Hardware, OpenRC Init & Networking
 	local _mobile="openrc halium-overlay dhcpcd iw wpa_supplicant tzdata procps-ng inetutils kbd"
 
-	pkgs="$_toolchain $_coreutils $_mobile"
+	# 4. Graphical Shell & Mobile Compositor (Phosh / Phoc / Hybris)
+	local _phosh="seatd wayland wlroots phoc phosh gtk3 gnome-desktop
+		gsettings-desktop-schemas polkit pulseaudio libfeedback libcallaudio
+		networkmanager upower libsecret linux-pam gcr p11-kit iso-codes
+		libhybris libgbm-hybris libdroid libgbinder libglibutil xkeyboard-config
+		hicolor-icon-theme adwaita-icon-theme"
+
+	pkgs="$_toolchain $_coreutils $_mobile $_phosh"
 	apks="$pkgs"
 
 	hostname="krelpin"

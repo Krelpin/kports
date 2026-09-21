@@ -1,0 +1,23 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libndp
+pkgver=1.9
+pkgrel=1
+pkgdesc='Library for Neighbor Discovery Protocol'
+arch=('aarch64' 'armv7h')
+url='https://github.com/jpirko/libndp'
+license=('LGPL-2.1-or-later')
+makedepends=('autoconf' 'automake' 'libtool' 'pkgconf')
+source=("${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./autogen.sh
+  ./configure --prefix=/usr --libdir=/usr/lib
+  make
+}
+
+package() {
+  make -C "${pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+}

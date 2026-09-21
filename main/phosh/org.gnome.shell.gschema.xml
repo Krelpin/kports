@@ -1,0 +1,16 @@
+<schemalist gettext-domain="gnome-shell">
+  <schema id="org.gnome.shell.keybindings" path="/org/gnome/shell/keybindings/">
+    <key name="toggle-overview" type="as">
+      <default><![CDATA[['<Super>s']]]></default>
+      <summary>Open the overview</summary>
+    </key>
+    <key name="toggle-application-view" type="as">
+      <default><![CDATA[['<Super>a']]]></default>
+      <summary>Open the application view</summary>
+    </key>
+    <key name="toggle-message-tray" type="as">
+      <default><![CDATA[['<Super>m']]]></default>
+      <summary>Toggle the message tray</summary>
+    </key>
+  </schema>
+</schemalist>

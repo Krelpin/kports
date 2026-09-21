@@ -1,0 +1,8 @@
+<schemalist gettext-domain="gnome-settings-daemon">
+  <schema id="org.gnome.settings-daemon.peripherals.touchscreen" path="/org/gnome/settings-daemon/peripherals/touchscreen/">
+    <key name="orientation-lock" type="b">
+      <default>false</default>
+      <summary>Whether the orientation of the screen should be locked</summary>
+    </key>
+  </schema>
+</schemalist>

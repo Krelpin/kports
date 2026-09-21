@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libsndfile
+pkgver=1.2.2
+pkgrel=1
+pkgdesc='Library for reading and writing sampled sound files'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://libsndfile.github.io/libsndfile/'
+license=('LGPL-2.1-or-later')
+makedepends=('cmake' 'ninja')
+source=("https://github.com/libsndfile/libsndfile/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -S "${pkgname}-${pkgver}" -B build -G Ninja \
+    -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=ON -DENABLE_EXTERNAL_LIBS=OFF \
+    -DBUILD_PROGRAMS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTING=OFF \
+    -DENABLE_CPACK=OFF
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

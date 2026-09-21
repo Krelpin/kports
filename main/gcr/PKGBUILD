@@ -1,0 +1,26 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gcr
+pkgver=3.41.2
+pkgrel=1
+pkgdesc='GNOME cryptographic services and secure entry widgets'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/gcr'
+license=('LGPL-2.1-or-later')
+depends=('glib2' 'gtk3' 'libgcrypt' 'p11-kit')
+makedepends=('meson' 'ninja' 'pkgconf')
+provides=('gcr-3')
+source=("https://download.gnome.org/sources/${pkgname}/3.41/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dgtk_doc=false -Dintrospection=false \
+    -Dsystemd=disabled -Dssh_agent=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}
