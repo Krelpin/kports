@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=double-conversion
+pkgver=3.3.1
+pkgrel=1
+pkgdesc='Binary-decimal and decimal-binary routines for IEEE doubles'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/google/double-conversion'
+license=('BSD-3-Clause')
+depends=('gcc-libs' 'glibc')
+makedepends=('cmake' 'ninja')
+provides=('libdouble-conversion.so')
+source=("https://github.com/google/${pkgname}/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -B build -S "${pkgname}-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DBUILD_SHARED_LIBS=ON
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libb2
+pkgver=0.98.1
+pkgrel=1
+pkgdesc='C library providing BLAKE2b, BLAKE2s, BLAKE2bp and BLAKE2sp'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/BLAKE2/libb2'
+license=('CC0-1.0')
+depends=('glibc')
+makedepends=('libtool')
+provides=('libb2.so')
+source=("https://github.com/BLAKE2/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
