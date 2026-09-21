@@ -1,0 +1,28 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libxslt
+pkgver=1.1.42
+pkgrel=1
+pkgdesc='XML stylesheet transformation library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.gnome.org/GNOME/libxslt'
+license=('MIT')
+depends=('libxml2' 'glibc' 'zlib' 'xz')
+provides=('libxslt.so' 'libexslt.so')
+source=("https://download.gnome.org/sources/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --disable-static \
+    --without-python
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

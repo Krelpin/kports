@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=duktape
+pkgver=2.7.0
+pkgrel=1
+pkgdesc='Embeddable Javascript engine'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://duktape.org/'
+license=('MIT')
+depends=('glibc')
+provides=('libduktape.so')
+source=("https://duktape.org/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/usr/lib
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/usr/lib \
+    DESTDIR="${pkgdir}" install
+}
