@@ -181,7 +181,7 @@ export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 # link the sysroot glibc. Put wrappers ahead of the host ones so builds get the
 # right version without moving the sysroot in front of the host libraries.
 KRELPIN_BINDIR="$(mktemp -d -t krelpin-bin.XXXXXX)"
-for _tool in meson ninja cmake python python3; do
+for _tool in meson ninja cmake python python3 libtool libtoolize; do
 	[ -x "$SYSROOT/usr/bin/$_tool" ] || continue
 	cat << EOF > "$KRELPIN_BINDIR/$_tool"
 #!/bin/sh
@@ -192,6 +192,18 @@ EOF
 done
 trap 'rm -rf "$KRELPIN_BINDIR" "${PACMAN_WRAPPER:-}"' EXIT
 export PATH="$KRELPIN_BINDIR:$PATH"
+
+# libtoolize resolves its data files through absolute /usr paths and wants
+# them laid out as in the source tree, so build that layout for it
+if [ -d "$SYSROOT/usr/share/libtool" ]; then
+	_LT_DATADIR="$KRELPIN_BINDIR/libtool-data"
+	mkdir -p "$_LT_DATADIR"
+	ln -sfn "$SYSROOT/usr/share/libtool/build-aux" "$_LT_DATADIR/build-aux"
+	ln -sfn "$SYSROOT/usr/share/libtool/libltdl" "$_LT_DATADIR/libltdl"
+	ln -sfn "$SYSROOT/usr/share/aclocal" "$_LT_DATADIR/m4"
+	export _lt_pkgdatadir="$_LT_DATADIR"
+	export ACLOCAL_PATH="$SYSROOT/usr/share/aclocal${ACLOCAL_PATH:+:$ACLOCAL_PATH}"
+fi
 [ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
 [ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
