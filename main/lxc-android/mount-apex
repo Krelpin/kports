@@ -1,0 +1,33 @@
+#!/bin/sh -eu
+
+# Activates the Android APEX packages on the host side.
+#
+# Since Android 10 bionic no longer lives in /system/lib64 but inside
+# com.android.runtime.apex, and libhybris resolves libc.so through the runtime
+# namespace in /system/etc/ld.config.txt. Nothing activates those packages for
+# us: apexd only runs inside the container, and its mounts stay in the
+# container's namespace. Droidian solves this with its own droidian-apex tool;
+# an .apex is a zip holding an ext4 apex_payload.img, so bsdtar and a loop
+# mount are enough.
+
+APEX_SRC=/android/system/apex
+# The rootfs is mounted read-only in user mode, so the payloads are unpacked
+# onto the data partition.
+APEX_CACHE=/userdata/apex
+
+[ -d "$APEX_SRC" ] || exit 0
+
+mountpoint -q /apex || mount -t tmpfs tmpfs /apex
+
+mkdir -p "$APEX_CACHE"
+for _apex in "$APEX_SRC"/*.apex; do
+	[ -e "$_apex" ] || continue
+
+	_name=$(basename "$_apex" .apex)
+	_img="$APEX_CACHE/$_name.img"
+
+	[ -s "$_img" ] || bsdtar -xOf "$_apex" apex_payload.img > "$_img"
+
+	mkdir -p "/apex/$_name"
+	mountpoint -q "/apex/$_name" || mount -o loop,ro "$_img" "/apex/$_name"
+done

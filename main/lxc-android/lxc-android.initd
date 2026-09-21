@@ -8,6 +8,12 @@ depend() {
 	before phosh
 }
 
+start_pre() {
+	ebegin "Activating the Android APEX packages"
+	/usr/libexec/lxc-android/mount-apex
+	eend $?
+}
+
 start() {
 	ebegin "Starting the Android container"
 	lxc-start -d -n android
