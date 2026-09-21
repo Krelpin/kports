@@ -1,0 +1,28 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=gdbm
+pkgver=1.26
+pkgrel=1
+pkgdesc='GNU database library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.gnu.org/software/gdbm/gdbm.html'
+license=('GPL-3.0-or-later')
+depends=('glibc' 'readline' 'ncurses')
+provides=('libgdbm.so' 'libgdbm_compat.so')
+source=("https://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --disable-static \
+    --enable-libgdbm-compat
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

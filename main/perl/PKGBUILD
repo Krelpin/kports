@@ -1,0 +1,40 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=perl
+pkgver=5.40.1
+pkgrel=1
+pkgdesc='A highly capable, feature-rich programming language'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.perl.org/'
+license=('GPL-1.0-or-later OR Artistic-1.0-Perl')
+# TODO: add db once ported; perl builds without the DB_File module
+depends=('glibc' 'gdbm' 'zlib' 'bzip2')
+source=("https://www.cpan.org/src/5.0/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./Configure -des \
+    -Dprefix=/usr \
+    -Dvendorprefix=/usr \
+    -Dprivlib=/usr/share/perl5/core_perl \
+    -Darchlib=/usr/lib/perl5/${pkgver%.*}/core_perl \
+    -Dsitelib=/usr/share/perl5/site_perl \
+    -Dsitearch=/usr/lib/perl5/${pkgver%.*}/site_perl \
+    -Dvendorlib=/usr/share/perl5/vendor_perl \
+    -Dvendorarch=/usr/lib/perl5/${pkgver%.*}/vendor_perl \
+    -Dscriptdir=/usr/bin/core_perl \
+    -Dsitescript=/usr/bin/site_perl \
+    -Dvendorscript=/usr/bin/vendor_perl \
+    -Dusethreads \
+    -Duseshrplib \
+    -Dusesitecustomize \
+    -Dman1dir=/usr/share/man/man1 \
+    -Dman3dir=/usr/share/man/man3
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
