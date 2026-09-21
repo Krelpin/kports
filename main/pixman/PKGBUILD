@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pixman
+pkgver=0.46.4
+pkgrel=1
+pkgdesc='Pixel-manipulation library for X and cairo'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.freedesktop.org/pixman/pixman'
+license=('MIT')
+depends=('glibc')
+makedepends=('meson' 'ninja')
+provides=('libpixman-1.so')
+source=("https://www.x.org/releases/individual/lib/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dgtk=disabled \
+    -Dlibpng=enabled \
+    -Dtests=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

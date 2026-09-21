@@ -1,0 +1,21 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=hwdata
+pkgver=0.393
+pkgrel=1
+pkgdesc='Hardware identification and configuration data'
+arch=('any')
+url='https://github.com/vcrhonek/hwdata'
+license=('GPL-2.0-or-later')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/vcrhonek/${pkgname}/archive/v${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --datadir=/usr/share --libdir=/usr/lib
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
