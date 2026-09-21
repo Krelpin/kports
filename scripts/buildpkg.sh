@@ -190,7 +190,7 @@ LD_LIBRARY_PATH="$SYSROOT/usr/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}" \
 EOF
 	chmod +x "$KRELPIN_BINDIR/$_tool"
 done
-trap 'rm -rf "$KRELPIN_BINDIR" "${PACMAN_WRAPPER:-}"' EXIT
+trap 'rm -rf "$KRELPIN_BINDIR" "${PACMAN_WRAPPER:-}" "${MAKEPKG_CONF:-}"' EXIT
 export PATH="$KRELPIN_BINDIR:$PATH"
 
 # libtoolize resolves its data files through absolute /usr paths and wants
@@ -261,7 +261,14 @@ for pkg in "${TARGET_PKGS[@]}"; do
 	cd "$pkg_dir"
 
 	# Build makepkg arguments
-	MAKEPKG_ARGS=("-f" "--skippgpcheck")
+	# Arch strips libtool archives; keeping them breaks sysroot builds because
+	# the .la files point at absolute /usr paths on the host
+	MAKEPKG_CONF="$(mktemp -t krelpin-makepkg.XXXXXX)"
+	{
+		cat /etc/makepkg.conf
+		echo 'OPTIONS=(strip docs !libtool !staticlibs emptydirs zipman purge !debug !lto !autodeps)'
+	} > "$MAKEPKG_CONF"
+	MAKEPKG_ARGS=("-f" "--skippgpcheck" "--config" "$MAKEPKG_CONF")
 	[ "$NODEPS" = "yes" ] && MAKEPKG_ARGS+=("-d")
 	[ "$NOCHECK" = "yes" ] && MAKEPKG_ARGS+=("--nocheck")
 	[ "$SIGN" = "yes" ] && MAKEPKG_ARGS+=("--sign")
