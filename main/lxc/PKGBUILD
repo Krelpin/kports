@@ -1,0 +1,38 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=lxc
+pkgver=7.0.0
+pkgrel=1
+pkgdesc='Linux containers'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://linuxcontainers.org/'
+license=('LGPL-2.1-or-later')
+# TODO: add perl, rsync and wget once ported; they are only used by the
+# container templates, not by the runtime
+depends=('bash' 'libseccomp' 'libcap' 'dbus' 'glibc')
+makedepends=('meson' 'ninja' 'python')
+provides=('liblxc.so')
+backup=('etc/lxc/default.conf')
+source=("https://linuxcontainers.org/downloads/${pkgname}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --sbindir=bin \
+    --buildtype=release \
+    -Dinit-script=sysvinit \
+    -Ddistrosysconfdir=/etc/conf.d \
+    -Dman=false \
+    -Dtests=false \
+    -Dapparmor=false \
+    -Dseccomp=true \
+    -Dcapabilities=true \
+    -Dselinux=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

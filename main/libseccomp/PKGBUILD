@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libseccomp
+pkgver=2.6.0
+pkgrel=1
+pkgdesc='Enhanced seccomp library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/seccomp/libseccomp'
+license=('LGPL-2.1-only')
+depends=('glibc')
+makedepends=('gperf')
+provides=('libseccomp.so')
+source=("https://github.com/seccomp/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
