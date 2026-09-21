@@ -171,12 +171,27 @@ if [ -f "$SYSROOT/etc/pacman.conf" ]; then
 exec pacman --config "$SYSROOT/etc/pacman.conf" --root "$SYSROOT" "\$@"
 EOF
 	chmod +x "$PACMAN_WRAPPER"
-	trap 'rm -f "$PACMAN_WRAPPER"' EXIT
 	export PACMAN="$PACMAN_WRAPPER"
 fi
 
 # Ensure local packaging utilities (makepkg, repo-add) are accessible
 export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+
+# Build tools that live in the sysroot are newer than the host copies, but they
+# link the sysroot glibc. Put wrappers ahead of the host ones so builds get the
+# right version without moving the sysroot in front of the host libraries.
+KRELPIN_BINDIR="$(mktemp -d -t krelpin-bin.XXXXXX)"
+for _tool in meson ninja cmake python python3; do
+	[ -x "$SYSROOT/usr/bin/$_tool" ] || continue
+	cat << EOF > "$KRELPIN_BINDIR/$_tool"
+#!/bin/sh
+LD_LIBRARY_PATH="$SYSROOT/usr/lib\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}" \
+	exec "$SYSROOT/usr/bin/$_tool" "\$@"
+EOF
+	chmod +x "$KRELPIN_BINDIR/$_tool"
+done
+trap 'rm -rf "$KRELPIN_BINDIR" "${PACMAN_WRAPPER:-}"' EXIT
+export PATH="$KRELPIN_BINDIR:$PATH"
 [ -d "$HOME/.local/lib" ] && export LIBRARY_PATH="$HOME/.local/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
 [ -d "$HOME/.local/lib" ] && export LD_LIBRARY_PATH="$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
