@@ -37,6 +37,9 @@ prepare() {
   [[ ! -d gcc ]] && ln -s gcc-${pkgver/+/-} gcc
   cd gcc
 
+  # aarch64 puts the target libraries in lib64 even with --disable-multilib
+  sed -i '/lp64=/s/lib64/lib/' gcc/config/aarch64/t-aarch64-linux
+
   # Download in-tree GMP, MPFR, MPC, and ISL prerequisites if missing
   if [[ ! -d gmp ]]; then
     msg "Downloading in-tree GMP, MPFR, MPC, and ISL prerequisites..."
@@ -117,10 +120,9 @@ package_gcc() {
   install -Dm755 "$srcdir"/c89 "$pkgdir"/usr/bin/c89
   install -Dm755 "$srcdir"/c99 "$pkgdir"/usr/bin/c99
 
-  # GCC installs these into /usr/lib64, which is not on the linker path
   rm -rf "$srcdir"/gcc-libs-pkg
   install -dm755 "$srcdir"/gcc-libs-pkg/usr/lib
-  for _lib in "$pkgdir"/usr/lib{,64}/lib{gcc_s,stdc++,atomic,gomp}.so*; do
+  for _lib in "$pkgdir"/usr/lib/lib{gcc_s,stdc++,atomic,gomp}.so*; do
     if [ -e "$_lib" ]; then
       mv "$_lib" "$srcdir"/gcc-libs-pkg/usr/lib/
     fi
