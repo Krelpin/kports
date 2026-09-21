@@ -2,7 +2,7 @@
 
 pkgname=halium-overlay
 pkgver=1
-pkgrel=3
+pkgrel=4
 pkgdesc='Applies a device port overlay over the root filesystem at boot'
 arch=('any')
 url='https://krelpin.org'
@@ -27,7 +27,11 @@ package() {
 
   # The Android container is bind-mounted at /android, but libhybris resolves
   # its Android libraries through the paths bionic's linker was built with.
-  for _d in apex odm system vendor; do
+  for _d in apex odm system; do
     ln -s "/android/${_d}" "${pkgdir}/${_d}"
   done
+
+  # vendor is a real directory rather than a link into the container: a GSI
+  # only ships /system, so the device's own vendor partition gets mounted here.
+  install -dm755 "${pkgdir}/vendor"
 }

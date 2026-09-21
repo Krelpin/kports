@@ -1,0 +1,41 @@
+#!/bin/sh -eu
+
+# Mounts the device's vendor partition at /vendor.
+#
+# A Halium GSI ships /system as android-rootfs.img, but /vendor stays on the
+# device. Android's init reads /vendor/etc/selinux/plat_sepolicy_vers.txt very
+# early and aborts with SIGABRT when it is missing, so the container crash-loops
+# until this is in place. Droidian does the same thing in mount-android.sh.
+
+[ -e /vendor/build.prop ] && exit 0
+mountpoint -q /vendor && exit 0
+
+# The marker init actually needs, so a partition that merely looks like vendor
+# does not get accepted.
+MARKER=etc/selinux/plat_sepolicy_vers.txt
+
+try_mount() {
+	mount -o ro "$1" /vendor 2>/dev/null || return 1
+	if [ -e "/vendor/$MARKER" ]; then
+		echo "mounted vendor from $1"
+		return 0
+	fi
+	umount /vendor
+	return 1
+}
+
+# Named partitions on a real device, then whole block devices for the
+# emulator, which hands them over as plain virtio disks with no labels.
+for _dir in by-partlabel by-name by-label by-partuuid; do
+	for _dev in "/dev/disk/$_dir"/vendor*; do
+		[ -e "$_dev" ] || continue
+		try_mount "$_dev" && exit 0
+	done
+done
+
+for _dev in /dev/vd*[0-9] /dev/vd[a-z] /dev/sd*[0-9] /dev/mmcblk*p[0-9]*; do
+	[ -b "$_dev" ] || continue
+	try_mount "$_dev" && exit 0
+done
+
+echo "WARNING: no vendor partition found, the Android container will not start" >&2

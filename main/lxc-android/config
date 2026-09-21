@@ -28,5 +28,8 @@ lxc.mount.entry = sys sys sysfs nodev,noexec,nosuid 0 0
 lxc.mount.entry = /android/data data bind bind 0 0
 lxc.mount.entry = /mnt mnt bind rbind 0 0
 lxc.mount.entry = /apex apex bind rbind,optional 0 0
+# Droidian binds vendor from mount-android.sh instead; an entry here keeps it
+# beside the other Android trees, and init aborts without it.
+lxc.mount.entry = /vendor vendor bind bind,optional 0 0
 lxc.mount.entry = /odm odm bind bind,optional 0 0
 lxc.mount.entry = /vendor_dlkm vendor_dlkm bind bind,optional 0 0

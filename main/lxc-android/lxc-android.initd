@@ -9,6 +9,10 @@ depend() {
 }
 
 start_pre() {
+	ebegin "Mounting the Android vendor partition"
+	/usr/libexec/lxc-android/mount-vendor
+	eend $?
+
 	ebegin "Activating the Android APEX packages"
 	/usr/libexec/lxc-android/mount-apex
 	eend $?
