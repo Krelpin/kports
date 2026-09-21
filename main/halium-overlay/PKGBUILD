@@ -2,12 +2,12 @@
 
 pkgname=halium-overlay
 pkgver=1
-pkgrel=1
+pkgrel=3
 pkgdesc='Applies a device port overlay over the root filesystem at boot'
 arch=('any')
 url='https://krelpin.org'
 license=('GPL-3.0-or-later')
-depends=('openrc' 'util-linux')
+depends=('lxc' 'openrc' 'util-linux')
 source=('mount-halium-overlay' 'halium-overlay.initd')
 sha256sums=('SKIP' 'SKIP')
 
@@ -18,4 +18,16 @@ package() {
     "${pkgdir}/etc/init.d/halium-overlay"
   install -dm755 "${pkgdir}/etc/runlevels/sysinit"
   ln -s /etc/init.d/halium-overlay "${pkgdir}/etc/runlevels/sysinit/halium-overlay"
+
+  # Mount points the halium initrd moves the Android container and the data
+  # partition onto before it pivots into this rootfs.
+  install -dm755 "${pkgdir}/android"
+  install -dm755 "${pkgdir}/userdata"
+  install -dm755 "${pkgdir}/var/lib/lxc/android/rootfs"
+
+  # The Android container is bind-mounted at /android, but libhybris resolves
+  # its Android libraries through the paths bionic's linker was built with.
+  for _d in apex odm system vendor; do
+    ln -s "/android/${_d}" "${pkgdir}/${_d}"
+  done
 }

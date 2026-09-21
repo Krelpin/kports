@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+
+description="Android HAL container"
+
+depend() {
+	need dev-mount cgroups
+	after modules localmount
+	before phosh
+}
+
+start() {
+	ebegin "Starting the Android container"
+	lxc-start -d -n android
+	lxc-wait -n android -s RUNNING -t 30
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping the Android container"
+	lxc-stop -n android -t 30
+	eend $?
+}
+
+status() {
+	lxc-info -n android -s
+}

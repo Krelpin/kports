@@ -95,7 +95,8 @@ if [ $# -eq 0 ]; then
 		libgcrypt libglibutil libgpg-error libgudev libhybris libinput\
 		libjpeg-turbo libliftoff libndp libnl libpciaccess libpng libseccomp\
 		libsecret libsndfile libtasn1 libunistring libxcrypt libxkbcommon libxml2\
-		linux-api-headers linux-pam make mesa mtdev ncurses networkmanager openrc\
+		linux-api-headers linux-pam lxc lxc-android make mesa mtdev ncurses\
+		networkmanager openrc\
 		openssl p11-kit pacman pacman-mirrorlist pango patch pcre2 pcsclite phoc\
 		phosh pixman pkgconf polkit procps-ng pulseaudio readline seatd sed shadow\
 		shared-mime-info tar tzdata upower util-linux wayland wayland-protocols\

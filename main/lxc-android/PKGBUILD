@@ -1,0 +1,20 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=lxc-android
+pkgver=1
+pkgrel=2
+pkgdesc='Runs the Android HAL side of a Halium port in an LXC container'
+arch=('any')
+url='https://github.com/droidian/lxc-android'
+license=('GPL-3.0-or-later')
+depends=('halium-overlay' 'lxc' 'openrc')
+source=('config' 'pre-start.sh' 'lxc-android.initd')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm644 "${srcdir}/config" "${pkgdir}/var/lib/lxc/android/config"
+  install -Dm755 "${srcdir}/pre-start.sh" "${pkgdir}/var/lib/lxc/android/pre-start.sh"
+  install -Dm755 "${srcdir}/lxc-android.initd" "${pkgdir}/etc/init.d/lxc-android"
+  install -dm755 "${pkgdir}/etc/runlevels/default"
+  ln -s /etc/init.d/lxc-android "${pkgdir}/etc/runlevels/default/lxc-android"
+}

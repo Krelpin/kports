@@ -1,0 +1,32 @@
+lxc.rootfs.path = /var/lib/lxc/android/rootfs
+lxc.uts.name = android
+
+lxc.net.0.type = none
+
+lxc.tty.dir = lxc
+lxc.tty.max  = 4
+lxc.pty.max = 1024
+lxc.arch = arm64
+lxc.cap.drop = mac_admin mac_override
+
+lxc.hook.pre-start = /var/lib/lxc/android/pre-start.sh
+
+lxc.init.cmd = /init
+
+# Droidian sets lxc.apparmor.profile here. The GKI kernel this port runs on
+# builds SELinux as the LSM and leaves CONFIG_SECURITY_APPARMOR unset, so lxc
+# is built without AppArmor and rejects the key.
+lxc.autodev = 0
+
+lxc.mount.entry = tmpfs dev tmpfs nosuid 0 0
+lxc.mount.entry = /dev/__properties__ dev/__properties__ bind bind,create=dir 0 0
+lxc.mount.entry = /dev/binderfs dev/binderfs bind bind,create=dir,optional 0 0
+lxc.mount.entry = /dev/socket dev/socket bind bind,create=dir 0 0
+lxc.mount.entry = proc proc proc nodev,noexec,nosuid 0 0
+lxc.mount.entry = sys sys sysfs nodev,noexec,nosuid 0 0
+#lxc.mount.entry = tmp tmp tmpfs nodev,noexec,nosuid 0 0
+lxc.mount.entry = /android/data data bind bind 0 0
+lxc.mount.entry = /mnt mnt bind rbind 0 0
+lxc.mount.entry = /apex apex bind rbind,optional 0 0
+lxc.mount.entry = /odm odm bind bind,optional 0 0
+lxc.mount.entry = /vendor_dlkm vendor_dlkm bind bind,optional 0 0
