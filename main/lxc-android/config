@@ -24,6 +24,10 @@ lxc.mount.entry = /dev/binderfs dev/binderfs bind bind,create=dir,optional 0 0
 lxc.mount.entry = /dev/socket dev/socket bind bind,create=dir 0 0
 lxc.mount.entry = proc proc proc nodev,noexec,nosuid 0 0
 lxc.mount.entry = sys sys sysfs nodev,noexec,nosuid 0 0
+# Mounting a fresh sysfs on /sys hides whatever lxc set up underneath it, and
+# Android's init builds its own hierarchy under /sys/fs/cgroup. Without this
+# lmkd cannot enable the memory controller and init reboots the container.
+lxc.mount.entry = cgroup2 sys/fs/cgroup cgroup2 rw,nosuid,nodev,noexec,relatime,create=dir 0 0
 #lxc.mount.entry = tmp tmp tmpfs nodev,noexec,nosuid 0 0
 lxc.mount.entry = /android/data data bind bind 0 0
 lxc.mount.entry = /mnt mnt bind rbind 0 0

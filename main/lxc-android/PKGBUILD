@@ -2,7 +2,7 @@
 
 pkgname=lxc-android
 pkgver=1
-pkgrel=4
+pkgrel=5
 pkgdesc='Runs the Android HAL side of a Halium port in an LXC container'
 arch=('any')
 url='https://github.com/droidian/lxc-android'
