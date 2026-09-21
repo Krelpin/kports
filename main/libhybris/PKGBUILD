@@ -16,6 +16,10 @@ sha256sums=('SKIP')
 
 build() {
   cd "${pkgname}-${_commit}"*/hybris 2>/dev/null || cd "${pkgname}-${_commit}/hybris"
+  # The Android headers predate C23 and use strdup without declaring it
+  export CFLAGS="${CFLAGS} -std=gnu17"
+  export CXXFLAGS="${CXXFLAGS} -std=gnu++17"
+
   ACLOCAL_PATH="${SYSROOT}/usr/share/aclocal" NOCONFIGURE=1 ./autogen.sh
   ./configure \
     --prefix=/usr \
