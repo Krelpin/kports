@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=shared-mime-info
+pkgver=2.4
+pkgrel=1
+pkgdesc='Freedesktop.org Shared MIME Info'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://gitlab.freedesktop.org/xdg/shared-mime-info'
+license=('GPL-2.0-or-later')
+depends=('glibc' 'glib2' 'libxml2')
+makedepends=('meson' 'ninja')
+source=("https://gitlab.freedesktop.org/xdg/${pkgname}/-/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dupdate-mimedb=false \
+    -Dbuild-tests=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

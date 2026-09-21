@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=acl
+pkgver=2.3.2
+pkgrel=1
+pkgdesc='Access control list utilities, libraries and headers'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://savannah.nongnu.org/projects/acl'
+license=('LGPL-2.1-or-later')
+depends=('attr' 'glibc')
+provides=('libacl.so')
+source=("https://download.savannah.nongnu.org/releases/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
