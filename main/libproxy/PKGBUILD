@@ -1,0 +1,34 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libproxy
+pkgver=0.5.9
+pkgrel=1
+pkgdesc='Library that provides automatic proxy configuration management'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://libproxy.github.io/libproxy/'
+license=('LGPL-2.1-or-later')
+depends=('glibc' 'gcc-libs' 'glib2' 'duktape')
+makedepends=('meson' 'ninja')
+provides=('libproxy.so')
+source=("https://github.com/${pkgname}/${pkgname}/archive/${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dtests=false \
+    -Ddocs=false \
+    -Dconfig-gnome=false \
+    -Dconfig-kde=false \
+    -Dconfig-osx=false \
+    -Dconfig-windows=false \
+    -Dconfig-env=true \
+    -Dpacrunner-duktape=true \
+    -Dintrospection=false \
+    -Dvapi=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=vulkan-headers
+pkgver=1.4.309
+_tag=v${pkgver}
+pkgrel=1
+pkgdesc='Vulkan header files'
+arch=('any')
+url='https://github.com/KhronosGroup/Vulkan-Headers'
+license=('Apache-2.0')
+makedepends=('cmake' 'ninja')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/KhronosGroup/Vulkan-Headers/archive/${_tag}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -B build -S "Vulkan-Headers-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

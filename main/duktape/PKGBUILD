@@ -14,11 +14,10 @@ sha256sums=('SKIP')
 
 build() {
   cd "${pkgname}-${pkgver}"
-  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/usr/lib
+  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr
 }
 
 package() {
   cd "${pkgname}-${pkgver}"
-  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr LIBDIR=/usr/lib \
-    DESTDIR="${pkgdir}" install
+  make -f Makefile.sharedlibrary INSTALL_PREFIX=/usr DESTDIR="${pkgdir}" install
 }
