@@ -1,0 +1,32 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=harfbuzz
+pkgver=10.4.0
+pkgrel=1
+pkgdesc='OpenType text shaping engine'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/harfbuzz/harfbuzz'
+license=('MIT')
+depends=('glibc' 'gcc-libs' 'glib2' 'freetype' 'graphite' 'icu')
+makedepends=('meson' 'ninja' 'python')
+provides=('libharfbuzz.so' 'libharfbuzz-gobject.so' 'libharfbuzz-icu.so' 'libharfbuzz-subset.so')
+source=("https://github.com/${pkgname}/${pkgname}/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Dcairo=disabled \
+    -Dglib=enabled \
+    -Dgobject=enabled \
+    -Dgraphite2=enabled \
+    -Dicu=enabled \
+    -Dfreetype=enabled \
+    -Ddocs=disabled \
+    -Dtests=disabled
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

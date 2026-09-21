@@ -1,0 +1,24 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=libpng
+pkgver=1.6.47
+pkgrel=1
+pkgdesc='A collection of routines used to create PNG format graphics files'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.libpng.org/pub/png/libpng.html'
+license=('libpng-2.0')
+depends=('glibc' 'zlib')
+provides=('libpng16.so')
+source=("https://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure --prefix=/usr --libdir=/usr/lib --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

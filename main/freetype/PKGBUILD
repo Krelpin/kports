@@ -1,0 +1,30 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=freetype
+pkgver=2.13.3
+pkgrel=1
+pkgdesc='Font rasterization library'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.freetype.org/'
+license=('FTL' 'GPL-2.0-or-later')
+depends=('glibc' 'zlib' 'bzip2' 'libpng' 'brotli')
+makedepends=('meson' 'ninja')
+provides=('libfreetype.so')
+source=("https://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr \
+    --libdir=lib \
+    --buildtype=release \
+    -Dbrotli=enabled \
+    -Dbzip2=enabled \
+    -Dpng=enabled \
+    -Dzlib=system
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

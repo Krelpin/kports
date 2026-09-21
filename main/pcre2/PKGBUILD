@@ -1,0 +1,33 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=pcre2
+pkgver=10.45
+pkgrel=1
+pkgdesc='Perl compatible regular expressions library, version 2'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.pcre.org/'
+license=('BSD-3-Clause')
+depends=('glibc' 'bzip2' 'zlib' 'readline')
+provides=('libpcre2-8.so' 'libpcre2-16.so' 'libpcre2-32.so' 'libpcre2-posix.so')
+source=("https://github.com/PCRE2Project/${pkgname}/releases/download/${pkgname}-${pkgver}/${pkgname}-${pkgver}.tar.bz2")
+sha256sums=('SKIP')
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  ./configure \
+    --prefix=/usr \
+    --libdir=/usr/lib \
+    --enable-pcre2-16 \
+    --enable-pcre2-32 \
+    --enable-jit \
+    --enable-pcre2grep-libz \
+    --enable-pcre2grep-libbz2 \
+    --enable-pcre2test-libreadline \
+    --disable-static
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

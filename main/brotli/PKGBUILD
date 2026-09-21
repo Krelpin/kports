@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=brotli
+pkgver=1.1.0
+pkgrel=1
+pkgdesc='Generic-purpose lossless compression algorithm'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/google/brotli'
+license=('MIT')
+depends=('glibc')
+makedepends=('cmake' 'ninja')
+provides=('libbrotlicommon.so' 'libbrotlidec.so' 'libbrotlienc.so')
+source=("https://github.com/google/${pkgname}/archive/v${pkgver}/${pkgname}-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -B build -S "${pkgname}-${pkgver}" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DBUILD_SHARED_LIBS=ON
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

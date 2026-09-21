@@ -1,0 +1,27 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=fontconfig
+pkgver=2.16.0
+pkgrel=1
+pkgdesc='Library for configuring and customizing font access'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://www.freedesktop.org/wiki/Software/fontconfig/'
+license=('MIT')
+depends=('glibc' 'freetype' 'expat' 'libxml2')
+makedepends=('meson' 'ninja' 'python')
+provides=('libfontconfig.so')
+source=("https://www.freedesktop.org/software/${pkgname}/release/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Ddoc=disabled \
+    -Dtests=disabled \
+    -Dxml-backend=libxml2
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}

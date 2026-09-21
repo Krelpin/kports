@@ -1,0 +1,25 @@
+# Maintainer: Krelpin Developers <dev@krelpin.org>
+
+pkgname=fribidi
+pkgver=1.0.16
+pkgrel=1
+pkgdesc='A Free Implementation of the Unicode Bidirectional Algorithm'
+arch=('aarch64' 'x86_64' 'armv7h' 'riscv64')
+url='https://github.com/fribidi/fribidi'
+license=('LGPL-2.1-or-later')
+depends=('glibc')
+makedepends=('meson' 'ninja')
+provides=('libfribidi.so')
+source=("https://github.com/${pkgname}/${pkgname}/releases/download/v${pkgver}/${pkgname}-${pkgver}.tar.xz")
+sha256sums=('SKIP')
+
+build() {
+  meson setup "${pkgname}-${pkgver}" build \
+    --prefix=/usr --libdir=lib --buildtype=release \
+    -Ddocs=false
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "${pkgdir}"
+}
